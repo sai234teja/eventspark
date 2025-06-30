@@ -14,6 +14,12 @@ interface PaymentModalProps {
   price: string;
 }
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: PaymentModalProps) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [userDetails, setUserDetails] = useState({
@@ -36,53 +42,93 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
 
     setIsProcessing(true);
 
-    // Initialize Razorpay payment
-    const options = {
-      key: "rzp_test_your_key_here", // Replace with your Razorpay key
-      amount: parseFloat(price.replace('$', '').replace('Free', '0')) * 100, // Amount in paise
-      currency: "INR",
-      name: "EventSpark",
-      description: `Registration for ${eventTitle}`,
-      handler: function (response: any) {
-        console.log("Payment successful:", response);
+    const amount = price === "Free" ? 0 : parseFloat(price.replace('$', '')) * 75;
+
+    if (amount === 0) {
+      // Free event - no payment needed
+      setTimeout(() => {
         toast({
-          title: "Payment Successful!",
-          description: "You have been registered for the event.",
+          title: "Registration Successful!",
+          description: "You have been registered for the free event.",
         });
         onSuccess();
         onClose();
         setIsProcessing(false);
-      },
-      prefill: {
-        name: userDetails.name,
-        email: userDetails.email,
-        contact: userDetails.phone,
-      },
-      theme: {
-        color: "#8B5CF6",
-      },
-      method: {
-        upi: {
-          vpa: "9398148549@paytm" // Your UPI ID
-        }
-      }
-    };
+      }, 1000);
+      return;
+    }
 
-    // Simulate payment for demo (replace with actual Razorpay integration)
-    setTimeout(() => {
-      toast({
-        title: "Payment Successful!",
-        description: "You have been registered for the event.",
-      });
-      onSuccess();
-      onClose();
+    // Load Razorpay script
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => {
+      const options = {
+        key: "rzp_test_9WzaAMmzjGhPDT", // Replace with your actual Razorpay key
+        amount: amount * 100, // Amount in paise
+        currency: "INR",
+        name: "EventSpark",
+        description: `Registration for ${eventTitle}`,
+        image: "/favicon.ico",
+        handler: function (response: any) {
+          console.log("Payment successful:", response);
+          toast({
+            title: "Payment Successful!",
+            description: `Payment ID: ${response.razorpay_payment_id}`,
+          });
+          onSuccess();
+          onClose();
+          setIsProcessing(false);
+        },
+        prefill: {
+          name: userDetails.name,
+          email: userDetails.email,
+          contact: userDetails.phone,
+        },
+        notes: {
+          address: userDetails.address,
+          event: eventTitle
+        },
+        theme: {
+          color: "#8B5CF6",
+        },
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+            toast({
+              title: "Payment Cancelled",
+              description: "Payment was cancelled by user.",
+              variant: "destructive"
+            });
+          }
+        }
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    };
+    
+    script.onerror = () => {
       setIsProcessing(false);
-    }, 2000);
+      toast({
+        title: "Payment Error",
+        description: "Failed to load payment gateway. Please try again.",
+        variant: "destructive"
+      });
+    };
+    
+    document.head.appendChild(script);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="bg-white/95 backdrop-blur-sm border-purple-300/20">
+      <DialogContent className="bg-white/95 backdrop-blur-sm border-purple-300/20 max-w-md">
         <DialogHeader>
           <DialogTitle className="text-purple-900">Complete Registration</DialogTitle>
           <DialogDescription className="text-purple-700">
@@ -140,7 +186,12 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
             <p className="text-purple-900 font-semibold">Payment Details:</p>
             <p className="text-purple-700">Event: {eventTitle}</p>
             <p className="text-purple-700">Amount: {price === "Free" ? "₹0" : `₹${parseFloat(price.replace('$', '')) * 75}`}</p>
-            <p className="text-purple-700 text-sm">UPI: 9398148549@paytm</p>
+            {price !== "Free" && (
+              <div className="mt-2 text-purple-700 text-sm">
+                <p>UPI ID: 9398148549@paytm</p>
+                <p>Supports: UPI, Cards, Net Banking, Wallets</p>
+              </div>
+            )}
           </div>
 
           <div className="flex gap-3">
@@ -157,7 +208,9 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
               disabled={isProcessing}
               className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
             >
-              {isProcessing ? "Processing..." : `Pay ${price === "Free" ? "₹0" : `₹${parseFloat(price.replace('$', '')) * 75}`}`}
+              {isProcessing ? "Processing..." : 
+               price === "Free" ? "Register Free" : 
+               `Pay ₹${parseFloat(price.replace('$', '')) * 75}`}
             </Button>
           </div>
         </div>

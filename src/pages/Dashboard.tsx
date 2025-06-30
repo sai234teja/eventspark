@@ -14,11 +14,14 @@ interface Event {
   date: string;
   time: string;
   location: string;
+  city: string;
+  country: string;
   attendees: number;
   maxCapacity: number;
   status: "upcoming" | "ongoing" | "completed";
   registrationDate: string;
   qrCode?: string;
+  price?: string;
 }
 
 const Dashboard = () => {
@@ -41,33 +44,91 @@ const Dashboard = () => {
     }
     setUser(JSON.parse(userData));
 
-    // Mock registered events
-    const mockRegisteredEvents = [
+    // Get user's registered events
+    const registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
+    
+    // All available events
+    const allEvents = [
       {
         id: 1,
         title: "Tech Innovation Summit 2024",
         date: "Dec 15, 2024",
         time: "9:00 AM - 6:00 PM",
         location: "San Francisco Convention Center",
+        city: "San Francisco",
+        country: "USA",
         attendees: 450,
         maxCapacity: 500,
         status: "upcoming" as const,
         registrationDate: "Nov 28, 2024",
-        qrCode: "EVENT-TECH-2024-USER123"
+        qrCode: "EVENT-TECH-2024-USER123",
+        price: "$75"
       },
       {
         id: 2,
-        title: "Creative Design Hackathon",
-        date: "Jan 8, 2025",
-        time: "48 Hours",
-        location: "Virtual Event",
-        attendees: 234,
-        maxCapacity: 300,
+        title: "Goa Beach Music Festival",
+        date: "Jan 20, 2025",
+        time: "6:00 PM - 2:00 AM",
+        location: "Baga Beach, North Goa",
+        city: "Goa",
+        country: "India",
+        attendees: 1200,
+        maxCapacity: 1500,
         status: "upcoming" as const,
         registrationDate: "Dec 1, 2024",
-        qrCode: "EVENT-DESIGN-2025-USER123"
+        qrCode: "EVENT-GOA-2025-USER123",
+        price: "$50"
+      },
+      {
+        id: 3,
+        title: "Mumbai Design Workshop",
+        date: "Feb 5, 2025",
+        time: "10:00 AM - 4:00 PM",
+        location: "Design Hub Mumbai",
+        city: "Mumbai",
+        country: "India",
+        attendees: 89,
+        maxCapacity: 100,
+        status: "upcoming" as const,
+        registrationDate: "Dec 5, 2024",
+        qrCode: "EVENT-DESIGN-2025-USER123",
+        price: "$30"
+      },
+      {
+        id: 4,
+        title: "Delhi Cultural Heritage Walk",
+        date: "Jan 15, 2025",
+        time: "8:00 AM - 12:00 PM",
+        location: "Red Fort Area, Delhi",
+        city: "Delhi",
+        country: "India",
+        attendees: 45,
+        maxCapacity: 50,
+        status: "upcoming" as const,
+        registrationDate: "Dec 10, 2024",
+        qrCode: "EVENT-DELHI-2025-USER123",
+        price: "Free"
+      },
+      {
+        id: 5,
+        title: "Goa Photography Retreat",
+        date: "Mar 10, 2025",
+        time: "7:00 AM - 6:00 PM",
+        location: "Palolem Beach, South Goa",
+        city: "Goa",
+        country: "India",
+        attendees: 25,
+        maxCapacity: 30,
+        status: "upcoming" as const,
+        registrationDate: "Dec 12, 2024",
+        qrCode: "EVENT-PHOTO-2025-USER123",
+        price: "$80"
       }
     ];
+
+    // Filter registered events
+    const userRegisteredEvents = allEvents.filter(event => registrations.includes(event.id));
+    setRegisteredEvents(userRegisteredEvents);
 
     // Mock created events (if user is an organizer)
     const mockCreatedEvents = [
@@ -77,6 +138,8 @@ const Dashboard = () => {
         date: "Dec 20, 2024",
         time: "2:00 PM - 5:00 PM",
         location: "Tech Hub Downtown",
+        city: "Bangalore",
+        country: "India",
         attendees: 45,
         maxCapacity: 50,
         status: "upcoming" as const,
@@ -88,6 +151,8 @@ const Dashboard = () => {
         date: "Jan 15, 2025",
         time: "10:00 AM - 4:00 PM",
         location: "Design Studio",
+        city: "Mumbai",
+        country: "India",
         attendees: 32,
         maxCapacity: 40,
         status: "upcoming" as const,
@@ -95,19 +160,35 @@ const Dashboard = () => {
       }
     ];
 
-    setRegisteredEvents(mockRegisteredEvents);
     setCreatedEvents(mockCreatedEvents);
 
     // Calculate totals
-    const upcomingCount = mockRegisteredEvents.filter(e => e.status === "upcoming").length;
+    const upcomingCount = userRegisteredEvents.filter(e => e.status === "upcoming").length;
     const totalAttendeesCount = mockCreatedEvents.reduce((sum, event) => sum + event.attendees, 0);
 
     setTotalStats({
-      registeredEvents: mockRegisteredEvents.length,
+      registeredEvents: userRegisteredEvents.length,
       createdEvents: mockCreatedEvents.length,
       upcomingEvents: upcomingCount,
       totalAttendees: totalAttendeesCount
     });
+
+    // Listen for storage changes to update counts
+    const handleStorageChange = () => {
+      const updatedRegistrations = JSON.parse(localStorage.getItem("registrations") || "[]");
+      const updatedUserRegisteredEvents = allEvents.filter(event => updatedRegistrations.includes(event.id));
+      setRegisteredEvents(updatedUserRegisteredEvents);
+      
+      const updatedUpcomingCount = updatedUserRegisteredEvents.filter(e => e.status === "upcoming").length;
+      setTotalStats(prev => ({
+        ...prev,
+        registeredEvents: updatedUserRegisteredEvents.length,
+        upcomingEvents: updatedUpcomingCount
+      }));
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
   }, [navigate]);
 
   const handleLogout = () => {
@@ -232,48 +313,66 @@ const Dashboard = () => {
                 </Button>
               </Link>
             </div>
-            <div className="grid md:grid-cols-2 gap-6">
-              {registeredEvents.map((event) => (
-                <Card key={event.id} className="bg-white/10 backdrop-blur-sm border-purple-300/20">
-                  <CardHeader>
-                    <div className="flex items-center justify-between">
-                      <CardTitle className="text-white">{event.title}</CardTitle>
-                      <Badge className={`${getStatusColor(event.status)} text-white`}>
-                        {event.status}
-                      </Badge>
-                    </div>
-                    <CardDescription className="text-purple-200">
-                      Registered on {event.registrationDate}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex items-center text-purple-100">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <span className="text-sm">{event.date} • {event.time}</span>
-                    </div>
-                    <div className="flex items-center text-purple-100">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span className="text-sm">{event.location}</span>
-                    </div>
-                    <div className="flex items-center text-purple-100">
-                      <Users className="h-4 w-4 mr-2" />
-                      <span className="text-sm">{event.attendees}/{event.maxCapacity} registered</span>
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <Link to={`/events/${event.id}`}>
-                        <Button variant="outline" size="sm" className="border-purple-300 text-purple-100 hover:bg-purple-800/50">
-                          View Details
+            {registeredEvents.length === 0 ? (
+              <Card className="bg-white/10 backdrop-blur-sm border-purple-300/20">
+                <CardContent className="p-8 text-center">
+                  <p className="text-purple-200 mb-4">You haven't registered for any events yet.</p>
+                  <Link to="/events">
+                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                      Browse Events
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {registeredEvents.map((event) => (
+                  <Card key={event.id} className="bg-white/10 backdrop-blur-sm border-purple-300/20">
+                    <CardHeader>
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-white">{event.title}</CardTitle>
+                        <Badge className={`${getStatusColor(event.status)} text-white`}>
+                          {event.status}
+                        </Badge>
+                      </div>
+                      <CardDescription className="text-purple-200">
+                        Registered on {event.registrationDate}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <div className="flex items-center text-purple-100">
+                        <Calendar className="h-4 w-4 mr-2" />
+                        <span className="text-sm">{event.date} • {event.time}</span>
+                      </div>
+                      <div className="flex items-center text-purple-100">
+                        <MapPin className="h-4 w-4 mr-2" />
+                        <span className="text-sm">{event.location}</span>
+                      </div>
+                      <div className="flex items-center text-purple-100">
+                        <Users className="h-4 w-4 mr-2" />
+                        <span className="text-sm">{event.attendees}/{event.maxCapacity} registered</span>
+                      </div>
+                      {event.price && (
+                        <div className="text-green-300 font-semibold">
+                          {event.price === "Free" ? "Free Event" : `₹${parseFloat(event.price.replace('$', '')) * 75}`}
+                        </div>
+                      )}
+                      <div className="flex gap-2 pt-2">
+                        <Link to={`/events/${event.id}`}>
+                          <Button variant="outline" size="sm" className="border-purple-300 text-purple-100 hover:bg-purple-800/50">
+                            View Details
+                          </Button>
+                        </Link>
+                        <Button size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                          <QrCode className="h-4 w-4 mr-2" />
+                          Show Ticket
                         </Button>
-                      </Link>
-                      <Button size="sm" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                        <QrCode className="h-4 w-4 mr-2" />
-                        Show Ticket
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="created" className="space-y-6">
@@ -329,35 +428,48 @@ const Dashboard = () => {
 
           <TabsContent value="tickets" className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Event Tickets</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              {registeredEvents.filter(e => e.qrCode).map((event) => (
-                <Card key={event.id} className="bg-white/10 backdrop-blur-sm border-purple-300/20">
-                  <CardHeader>
-                    <CardTitle className="text-white">{event.title}</CardTitle>
-                    <CardDescription className="text-purple-200">
-                      {event.date} • {event.time}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="text-center space-y-4">
-                    <div className="bg-white p-4 rounded-lg inline-block">
-                      <QRCodeComponent value={event.qrCode!} size={200} />
-                    </div>
-                    <div className="text-purple-100">
-                      <p className="text-sm font-mono">{event.qrCode}</p>
-                      <p className="text-xs mt-1">Show this QR code at the event entrance</p>
-                    </div>
-                    <Button
-                      onClick={() => {
-                        navigator.clipboard.writeText(event.qrCode!);
-                      }}
-                      className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
-                    >
-                      Copy Code
+            {registeredEvents.filter(e => e.qrCode).length === 0 ? (
+              <Card className="bg-white/10 backdrop-blur-sm border-purple-300/20">
+                <CardContent className="p-8 text-center">
+                  <p className="text-purple-200 mb-4">No tickets available. Register for events to get tickets.</p>
+                  <Link to="/events">
+                    <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                      Browse Events
                     </Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {registeredEvents.filter(e => e.qrCode).map((event) => (
+                  <Card key={event.id} className="bg-white/10 backdrop-blur-sm border-purple-300/20">
+                    <CardHeader>
+                      <CardTitle className="text-white">{event.title}</CardTitle>
+                      <CardDescription className="text-purple-200">
+                        {event.date} • {event.time}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="text-center space-y-4">
+                      <div className="bg-white p-4 rounded-lg inline-block">
+                        <QRCodeComponent value={event.qrCode!} size={200} />
+                      </div>
+                      <div className="text-purple-100">
+                        <p className="text-sm font-mono">{event.qrCode}</p>
+                        <p className="text-xs mt-1">Show this QR code at the event entrance</p>
+                      </div>
+                      <Button
+                        onClick={() => {
+                          navigator.clipboard.writeText(event.qrCode!);
+                        }}
+                        className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+                      >
+                        Copy Code
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </div>

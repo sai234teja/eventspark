@@ -36,14 +36,14 @@ const EventDetails = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   useEffect(() => {
-    // Mock event data with location and status
+    // Mock event data with proper location details
     const mockEvents: Event[] = [
       {
         id: 1,
         title: "Tech Innovation Summit 2024",
         date: "Dec 15, 2024",
         time: "9:00 AM - 6:00 PM",
-        location: "San Francisco Convention Center, 747 Howard St",
+        location: "San Francisco Convention Center, 747 Howard St, San Francisco, CA 94103",
         city: "San Francisco",
         country: "USA",
         attendees: 450,
@@ -61,7 +61,7 @@ const EventDetails = () => {
         title: "Goa Beach Music Festival",
         date: "Jan 20, 2025",
         time: "6:00 PM - 2:00 AM",
-        location: "Baga Beach, North Goa",
+        location: "Baga Beach, Calangute, North Goa, Goa 403516, India",
         city: "Goa",
         country: "India",
         attendees: 1200,
@@ -71,6 +71,60 @@ const EventDetails = () => {
         price: "$50",
         description: "Experience the ultimate beach party with international DJs and local artists. Dance under the stars at Goa's most beautiful beach location.",
         organizer: "Goa Events",
+        isCompleted: false,
+        registrationOpen: true
+      },
+      {
+        id: 3,
+        title: "Mumbai Design Workshop",
+        date: "Feb 5, 2025",
+        time: "10:00 AM - 4:00 PM",
+        location: "Design Hub Mumbai, Bandra West, Mumbai, Maharashtra 400050, India",
+        city: "Mumbai",
+        country: "India",
+        attendees: 89,
+        maxCapacity: 100,
+        image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop",
+        category: "Design",
+        price: "$30",
+        description: "Learn modern design principles from industry experts.",
+        organizer: "Design Masters",
+        isCompleted: false,
+        registrationOpen: true
+      },
+      {
+        id: 4,
+        title: "Delhi Cultural Heritage Walk",
+        date: "Jan 15, 2025",
+        time: "8:00 AM - 12:00 PM",
+        location: "Red Fort, Netaji Subhash Marg, Chandni Chowk, New Delhi, Delhi 110006, India",
+        city: "Delhi",
+        country: "India",
+        attendees: 45,
+        maxCapacity: 50,
+        image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=400&fit=crop",
+        category: "Cultural",
+        price: "Free",
+        description: "Explore Delhi's rich cultural heritage with expert guides.",
+        organizer: "Heritage Tours India",
+        isCompleted: false,
+        registrationOpen: true
+      },
+      {
+        id: 5,
+        title: "Goa Photography Retreat",
+        date: "Mar 10, 2025",
+        time: "7:00 AM - 6:00 PM",
+        location: "Palolem Beach, Canacona, South Goa, Goa 403702, India",
+        city: "Goa",
+        country: "India",
+        attendees: 25,
+        maxCapacity: 30,
+        image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&h=400&fit=crop",
+        category: "Education",
+        price: "$80",
+        description: "Capture Goa's beauty with professional photography guidance.",
+        organizer: "Goa Photography Club",
         isCompleted: false,
         registrationOpen: true
       }
@@ -90,12 +144,17 @@ const EventDetails = () => {
   const handleRegistrationSuccess = () => {
     if (event) {
       const registrations = JSON.parse(localStorage.getItem("registrations") || "[]");
-      registrations.push(event.id);
-      localStorage.setItem("registrations", JSON.stringify(registrations));
-      setIsRegistered(true);
-      
-      // Update attendee count
-      setEvent(prev => prev ? { ...prev, attendees: prev.attendees + 1 } : null);
+      if (!registrations.includes(event.id)) {
+        registrations.push(event.id);
+        localStorage.setItem("registrations", JSON.stringify(registrations));
+        setIsRegistered(true);
+        
+        // Update attendee count
+        setEvent(prev => prev ? { ...prev, attendees: prev.attendees + 1 } : null);
+        
+        // Trigger storage event to update other components
+        window.dispatchEvent(new Event('storage'));
+      }
     }
   };
 
@@ -200,7 +259,7 @@ const EventDetails = () => {
                 <div className="flex items-start text-purple-100">
                   <MapPin className="h-5 w-5 mr-3 text-purple-300 mt-0.5" />
                   <div>
-                    <div>{event.location}</div>
+                    <div className="font-medium">{event.location}</div>
                     <div className="text-sm text-purple-300">{event.city}, {event.country}</div>
                   </div>
                 </div>
@@ -230,7 +289,7 @@ const EventDetails = () => {
                   </Button>
                 ) : (
                   <div className="text-center">
-                    <Badge className="bg-green-600 text-white mb-2">Already Registered</Badge>
+                    <Badge className="bg-green-600 text-white mb-2">✓ Registered</Badge>
                     <Link to="/dashboard">
                       <Button variant="outline" className="w-full border-purple-300 text-purple-100 hover:bg-purple-800/50">
                         View My Tickets

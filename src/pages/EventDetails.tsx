@@ -1,10 +1,12 @@
-
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, MapPin, Users, Clock, Sparkles, ArrowLeft, Share2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar, MapPin, Users, Clock, Sparkles, ArrowLeft, Share2, Edit, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import PaymentModal from "@/components/PaymentModal";
 
@@ -34,6 +36,8 @@ const EventDetails = () => {
   const [event, setEvent] = useState<Event | null>(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editForm, setEditForm] = useState<Partial<Event>>({});
 
   useEffect(() => {
     // Mock event data with proper location details
@@ -132,6 +136,7 @@ const EventDetails = () => {
 
     const foundEvent = mockEvents.find(e => e.id === parseInt(id || "0"));
     setEvent(foundEvent || null);
+    setEditForm(foundEvent || {});
 
     // Check registration status
     const user = localStorage.getItem("user");
@@ -164,6 +169,37 @@ const EventDetails = () => {
       title: "Link Copied!",
       description: "Event link has been copied to clipboard.",
     });
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (event && editForm) {
+      const updatedEvent = { ...event, ...editForm };
+      setEvent(updatedEvent);
+      setIsEditing(false);
+      toast({
+        title: "Event Updated!",
+        description: "Event details have been successfully updated.",
+      });
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditForm(event || {});
+    setIsEditing(false);
+  };
+
+  const handleCompleteEvent = () => {
+    if (event) {
+      setEvent(prev => prev ? { ...prev, isCompleted: true, registrationOpen: false } : null);
+      toast({
+        title: "Event Completed!",
+        description: "Event has been marked as completed and registration is now closed.",
+      });
+    }
   };
 
   if (!event) {
@@ -229,20 +265,67 @@ const EventDetails = () => {
                   <Badge className="bg-orange-600 text-white">Registration Closed</Badge>
                 )}
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleShare}
-                className="border-purple-300/30 text-purple-100 hover:bg-purple-800/50"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleShare}
+                  className="border-purple-300/30 text-purple-100 hover:bg-purple-800/50"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+                {/* Edit button for event organizers */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={isEditing ? handleSaveEdit : handleEdit}
+                  className="border-purple-300/30 text-purple-100 hover:bg-purple-800/50"
+                >
+                  {isEditing ? <Save className="h-4 w-4 mr-2" /> : <Edit className="h-4 w-4 mr-2" />}
+                  {isEditing ? "Save" : "Edit"}
+                </Button>
+                {isEditing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancelEdit}
+                    className="border-red-300/30 text-red-100 hover:bg-red-800/50"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Cancel
+                  </Button>
+                )}
+              </div>
             </div>
-            <CardTitle className="text-3xl text-white mt-4">{event.title}</CardTitle>
-            <CardDescription className="text-purple-200">
-              Organized by {event.organizer}
-            </CardDescription>
+            
+            {isEditing ? (
+              <div className="space-y-4 mt-4">
+                <div>
+                  <Label className="text-purple-200">Event Title</Label>
+                  <Input
+                    value={editForm.title || ""}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
+                    className="bg-white/5 border-purple-300/30 text-white"
+                  />
+                </div>
+                <div>
+                  <Label className="text-purple-200">Description</Label>
+                  <Textarea
+                    value={editForm.description || ""}
+                    onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                    className="bg-white/5 border-purple-300/30 text-white"
+                  />
+                </div>
+              </div>
+            ) : (
+              <>
+                <CardTitle className="text-3xl text-white mt-4">{event.title}</CardTitle>
+                <CardDescription className="text-purple-200">
+                  Organized by {event.organizer}
+                </CardDescription>
+              </>
+            )}
           </CardHeader>
 
           <CardContent className="space-y-6">
@@ -296,6 +379,17 @@ const EventDetails = () => {
                       </Button>
                     </Link>
                   </div>
+                )}
+                
+                {/* Event management buttons for organizers */}
+                {!event.isCompleted && (
+                  <Button
+                    onClick={handleCompleteEvent}
+                    variant="outline"
+                    className="w-full border-red-300 text-red-100 hover:bg-red-800/50"
+                  >
+                    Mark Event as Completed
+                  </Button>
                 )}
               </div>
             </div>

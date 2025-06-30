@@ -25,6 +25,12 @@ const Dashboard = () => {
   const [user, setUser] = useState<any>(null);
   const [registeredEvents, setRegisteredEvents] = useState<Event[]>([]);
   const [createdEvents, setCreatedEvents] = useState<Event[]>([]);
+  const [totalStats, setTotalStats] = useState({
+    registeredEvents: 0,
+    createdEvents: 0,
+    upcomingEvents: 0,
+    totalAttendees: 0
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,7 +42,7 @@ const Dashboard = () => {
     setUser(JSON.parse(userData));
 
     // Mock registered events
-    setRegisteredEvents([
+    const mockRegisteredEvents = [
       {
         id: 1,
         title: "Tech Innovation Summit 2024",
@@ -45,7 +51,7 @@ const Dashboard = () => {
         location: "San Francisco Convention Center",
         attendees: 450,
         maxCapacity: 500,
-        status: "upcoming",
+        status: "upcoming" as const,
         registrationDate: "Nov 28, 2024",
         qrCode: "EVENT-TECH-2024-USER123"
       },
@@ -57,14 +63,14 @@ const Dashboard = () => {
         location: "Virtual Event",
         attendees: 234,
         maxCapacity: 300,
-        status: "upcoming",
+        status: "upcoming" as const,
         registrationDate: "Dec 1, 2024",
         qrCode: "EVENT-DESIGN-2025-USER123"
       }
-    ]);
+    ];
 
     // Mock created events (if user is an organizer)
-    setCreatedEvents([
+    const mockCreatedEvents = [
       {
         id: 101,
         title: "Web Development Workshop",
@@ -73,10 +79,35 @@ const Dashboard = () => {
         location: "Tech Hub Downtown",
         attendees: 45,
         maxCapacity: 50,
-        status: "upcoming",
+        status: "upcoming" as const,
         registrationDate: "Nov 15, 2024"
+      },
+      {
+        id: 102,
+        title: "UI/UX Design Masterclass",
+        date: "Jan 15, 2025",
+        time: "10:00 AM - 4:00 PM",
+        location: "Design Studio",
+        attendees: 32,
+        maxCapacity: 40,
+        status: "upcoming" as const,
+        registrationDate: "Dec 5, 2024"
       }
-    ]);
+    ];
+
+    setRegisteredEvents(mockRegisteredEvents);
+    setCreatedEvents(mockCreatedEvents);
+
+    // Calculate totals
+    const upcomingCount = mockRegisteredEvents.filter(e => e.status === "upcoming").length;
+    const totalAttendeesCount = mockCreatedEvents.reduce((sum, event) => sum + event.attendees, 0);
+
+    setTotalStats({
+      registeredEvents: mockRegisteredEvents.length,
+      createdEvents: mockCreatedEvents.length,
+      upcomingEvents: upcomingCount,
+      totalAttendees: totalAttendeesCount
+    });
   }, [navigate]);
 
   const handleLogout = () => {
@@ -137,7 +168,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-200 text-sm">Registered Events</p>
-                  <p className="text-3xl font-bold text-white">{registeredEvents.length}</p>
+                  <p className="text-3xl font-bold text-white">{totalStats.registeredEvents}</p>
                 </div>
                 <Calendar className="h-8 w-8 text-purple-300" />
               </div>
@@ -148,7 +179,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-200 text-sm">Created Events</p>
-                  <p className="text-3xl font-bold text-white">{createdEvents.length}</p>
+                  <p className="text-3xl font-bold text-white">{totalStats.createdEvents}</p>
                 </div>
                 <Plus className="h-8 w-8 text-purple-300" />
               </div>
@@ -159,9 +190,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-200 text-sm">Upcoming Events</p>
-                  <p className="text-3xl font-bold text-white">
-                    {registeredEvents.filter(e => e.status === "upcoming").length}
-                  </p>
+                  <p className="text-3xl font-bold text-white">{totalStats.upcomingEvents}</p>
                 </div>
                 <Clock className="h-8 w-8 text-purple-300" />
               </div>
@@ -172,9 +201,7 @@ const Dashboard = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-purple-200 text-sm">Total Attendees</p>
-                  <p className="text-3xl font-bold text-white">
-                    {createdEvents.reduce((sum, event) => sum + event.attendees, 0)}
-                  </p>
+                  <p className="text-3xl font-bold text-white">{totalStats.totalAttendees}</p>
                 </div>
                 <Users className="h-8 w-8 text-purple-300" />
               </div>
@@ -321,7 +348,6 @@ const Dashboard = () => {
                     </div>
                     <Button
                       onClick={() => {
-                        // In a real app, this would download or share the QR code
                         navigator.clipboard.writeText(event.qrCode!);
                       }}
                       className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"

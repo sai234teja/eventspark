@@ -11,32 +11,60 @@ import { Calendar, MapPin, Users, Clock, Sparkles, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const CreateEvent = () => {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [location, setLocation] = useState("");
-  const [category, setCategory] = useState("");
-  const [maxCapacity, setMaxCapacity] = useState("");
-  const [price, setPrice] = useState("");
+  const [formData, setFormData] = useState({
+    title: "",
+    description: "",
+    date: "",
+    time: "",
+    location: "",
+    city: "",
+    country: "",
+    category: "",
+    maxCapacity: "",
+    price: "",
+    registrationDeadline: ""
+  });
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!formData.title || !formData.description || !formData.date || !formData.time || 
+        !formData.location || !formData.city || !formData.country || !formData.category) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     // Simulate event creation
     setTimeout(() => {
       toast({
         title: "Event Created Successfully!",
-        description: `${title} has been created and is now live.`,
+        description: `${formData.title} has been created and is now live.`,
       });
       navigate("/dashboard");
       setIsLoading(false);
     }, 1500);
   };
+
+  const countries = [
+    "India", "USA", "UK", "Canada", "Australia", "Germany", "France", "Japan", "Singapore", "UAE"
+  ];
+
+  const indianCities = [
+    "Mumbai", "Delhi", "Bangalore", "Chennai", "Kolkata", "Pune", "Hyderabad", "Ahmedabad", "Goa", "Jaipur"
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -80,19 +108,19 @@ const CreateEvent = () => {
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="title" className="text-purple-200">Event Title</Label>
+                  <Label htmlFor="title" className="text-purple-200">Event Title *</Label>
                   <Input
                     id="title"
                     placeholder="Enter event title"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    value={formData.title}
+                    onChange={(e) => handleInputChange("title", e.target.value)}
                     className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category" className="text-purple-200">Category</Label>
-                  <Select value={category} onValueChange={setCategory} required>
+                  <Label htmlFor="category" className="text-purple-200">Category *</Label>
+                  <Select value={formData.category} onValueChange={(value) => handleInputChange("category", value)} required>
                     <SelectTrigger className="bg-white/5 border-purple-300/30 text-white">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
@@ -109,12 +137,12 @@ const CreateEvent = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description" className="text-purple-200">Description</Label>
+                <Label htmlFor="description" className="text-purple-200">Description *</Label>
                 <Textarea
                   id="description"
                   placeholder="Describe your event..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={formData.description}
+                  onChange={(e) => handleInputChange("description", e.target.value)}
                   className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300 min-h-[100px]"
                   required
                 />
@@ -124,13 +152,13 @@ const CreateEvent = () => {
                 <div className="space-y-2">
                   <Label htmlFor="date" className="text-purple-200 flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />
-                    Date
+                    Event Date *
                   </Label>
                   <Input
                     id="date"
                     type="date"
-                    value={date}
-                    onChange={(e) => setDate(e.target.value)}
+                    value={formData.date}
+                    onChange={(e) => handleInputChange("date", e.target.value)}
                     className="bg-white/5 border-purple-300/30 text-white"
                     required
                   />
@@ -138,61 +166,118 @@ const CreateEvent = () => {
                 <div className="space-y-2">
                   <Label htmlFor="time" className="text-purple-200 flex items-center">
                     <Clock className="h-4 w-4 mr-2" />
-                    Time
+                    Time *
                   </Label>
                   <Input
                     id="time"
-                    type="time"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="bg-white/5 border-purple-300/30 text-white"
+                    placeholder="e.g., 9:00 AM - 6:00 PM"
+                    value={formData.time}
+                    onChange={(e) => handleInputChange("time", e.target.value)}
+                    className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
                     required
                   />
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="location" className="text-purple-200 flex items-center">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Location
-                </Label>
-                <Input
-                  id="location"
-                  placeholder="Enter event location"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
-                  required
-                />
+              {/* Location Section */}
+              <div className="space-y-4 p-4 bg-white/5 rounded-lg border border-purple-300/20">
+                <h3 className="text-lg font-semibold text-white flex items-center">
+                  <MapPin className="h-5 w-5 mr-2" />
+                  Event Location
+                </h3>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="location" className="text-purple-200">Venue Address *</Label>
+                  <Input
+                    id="location"
+                    placeholder="Enter complete venue address"
+                    value={formData.location}
+                    onChange={(e) => handleInputChange("location", e.target.value)}
+                    className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                    required
+                  />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="country" className="text-purple-200">Country *</Label>
+                    <Select value={formData.country} onValueChange={(value) => handleInputChange("country", value)} required>
+                      <SelectTrigger className="bg-white/5 border-purple-300/30 text-white">
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {countries.map(country => (
+                          <SelectItem key={country} value={country}>{country}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="city" className="text-purple-200">City *</Label>
+                    {formData.country === "India" ? (
+                      <Select value={formData.city} onValueChange={(value) => handleInputChange("city", value)} required>
+                        <SelectTrigger className="bg-white/5 border-purple-300/30 text-white">
+                          <SelectValue placeholder="Select city" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {indianCities.map(city => (
+                            <SelectItem key={city} value={city}>{city}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id="city"
+                        placeholder="Enter city name"
+                        value={formData.city}
+                        onChange={(e) => handleInputChange("city", e.target.value)}
+                        className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                        required
+                      />
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <Label htmlFor="maxCapacity" className="text-purple-200 flex items-center">
                     <Users className="h-4 w-4 mr-2" />
-                    Max Capacity
+                    Max Capacity *
                   </Label>
                   <Input
                     id="maxCapacity"
                     type="number"
                     placeholder="100"
-                    value={maxCapacity}
-                    onChange={(e) => setMaxCapacity(e.target.value)}
+                    value={formData.maxCapacity}
+                    onChange={(e) => handleInputChange("maxCapacity", e.target.value)}
                     className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="price" className="text-purple-200">Price</Label>
+                  <Label htmlFor="price" className="text-purple-200">Registration Fee *</Label>
                   <Input
                     id="price"
-                    placeholder="Free or $20"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
+                    placeholder="Free or ₹500"
+                    value={formData.price}
+                    onChange={(e) => handleInputChange("price", e.target.value)}
                     className="bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
                     required
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="registrationDeadline" className="text-purple-200">Registration Deadline</Label>
+                <Input
+                  id="registrationDeadline"
+                  type="date"
+                  value={formData.registrationDeadline}
+                  onChange={(e) => handleInputChange("registrationDeadline", e.target.value)}
+                  className="bg-white/5 border-purple-300/30 text-white"
+                />
               </div>
 
               <div className="space-y-2">

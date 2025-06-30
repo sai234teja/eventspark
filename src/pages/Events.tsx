@@ -11,7 +11,8 @@ import { Calendar, MapPin, Users, Search, Filter, Sparkles } from "lucide-react"
 const Events = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
-  const [dateFilter, setDateFilter] = useState("all");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [countryFilter, setCountryFilter] = useState("all");
 
   const events = [
     {
@@ -20,77 +21,101 @@ const Events = () => {
       date: "Dec 15, 2024",
       time: "9:00 AM - 6:00 PM",
       location: "San Francisco Convention Center",
+      city: "San Francisco",
+      country: "USA",
       attendees: 450,
       maxCapacity: 500,
       image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
       category: "Technology",
-      price: "Free",
-      description: "Join industry leaders for a day of innovation and networking."
+      price: "$75",
+      description: "Join industry leaders for a day of innovation and networking.",
+      isCompleted: false,
+      registrationOpen: true
     },
     {
       id: 2,
-      title: "Creative Design Hackathon",
-      date: "Jan 8, 2025",
-      time: "48 Hours",
-      location: "Virtual Event",
-      attendees: 234,
-      maxCapacity: 300,
-      image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop",
-      category: "Design",
-      price: "$25",
-      description: "48-hour design challenge with amazing prizes and mentorship."
-    },
-    {
-      id: 3,
-      title: "Cultural Heritage Festival",
-      date: "Feb 20, 2025",
-      time: "2:00 PM - 10:00 PM",
-      location: "Central Park Amphitheater",
-      attendees: 890,
-      maxCapacity: 1000,
-      image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=400&fit=crop",
-      category: "Cultural",
-      price: "$15",
-      description: "Celebrate diverse cultures with music, food, and performances."
-    },
-    {
-      id: 4,
-      title: "Startup Pitch Competition",
-      date: "Mar 5, 2025",
-      time: "6:00 PM - 9:00 PM",
-      location: "Innovation Hub",
-      attendees: 156,
-      maxCapacity: 200,
-      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=400&fit=crop",
-      category: "Business",
-      price: "$10",
-      description: "Watch promising startups pitch to top investors."
-    },
-    {
-      id: 5,
-      title: "Photography Workshop",
-      date: "Mar 12, 2025",
-      time: "10:00 AM - 4:00 PM",
-      location: "Downtown Art Studio",
-      attendees: 23,
-      maxCapacity: 30,
-      image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&h=400&fit=crop",
-      category: "Education",
-      price: "$75",
-      description: "Learn professional photography techniques from experts."
-    },
-    {
-      id: 6,
-      title: "Music Festival 2025",
-      date: "Apr 15, 2025",
-      time: "12:00 PM - 11:00 PM",
-      location: "Riverside Park",
-      attendees: 2340,
-      maxCapacity: 3000,
+      title: "Goa Beach Music Festival",
+      date: "Jan 20, 2025",
+      time: "6:00 PM - 2:00 AM",
+      location: "Baga Beach",
+      city: "Goa",
+      country: "India",
+      attendees: 1200,
+      maxCapacity: 1500,
       image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
       category: "Entertainment",
       price: "$50",
-      description: "A day of live music featuring local and international artists."
+      description: "Experience the ultimate beach party with international DJs.",
+      isCompleted: false,
+      registrationOpen: true
+    },
+    {
+      id: 3,
+      title: "Mumbai Design Workshop",
+      date: "Feb 5, 2025",
+      time: "10:00 AM - 4:00 PM",
+      location: "Design Hub Mumbai",
+      city: "Mumbai",
+      country: "India",
+      attendees: 89,
+      maxCapacity: 100,
+      image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop",
+      category: "Design",
+      price: "$30",
+      description: "Learn modern design principles from industry experts.",
+      isCompleted: false,
+      registrationOpen: true
+    },
+    {
+      id: 4,
+      title: "Delhi Cultural Heritage Walk",
+      date: "Jan 15, 2025",
+      time: "8:00 AM - 12:00 PM",
+      location: "Red Fort Area",
+      city: "Delhi",
+      country: "India",
+      attendees: 45,
+      maxCapacity: 50,
+      image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=400&fit=crop",
+      category: "Cultural",
+      price: "Free",
+      description: "Explore Delhi's rich cultural heritage with expert guides.",
+      isCompleted: false,
+      registrationOpen: true
+    },
+    {
+      id: 5,
+      title: "Goa Photography Retreat",
+      date: "Mar 10, 2025",
+      time: "7:00 AM - 6:00 PM",
+      location: "Various beaches in South Goa",
+      city: "Goa",
+      country: "India",
+      attendees: 25,
+      maxCapacity: 30,
+      image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&h=400&fit=crop",
+      category: "Education",
+      price: "$80",
+      description: "Capture Goa's beauty with professional photography guidance.",
+      isCompleted: false,
+      registrationOpen: true
+    },
+    {
+      id: 6,
+      title: "Completed Tech Event",
+      date: "Nov 20, 2024",
+      time: "9:00 AM - 5:00 PM",
+      location: "Bangalore Tech Park",
+      city: "Bangalore",
+      country: "India",
+      attendees: 300,
+      maxCapacity: 300,
+      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=400&fit=crop",
+      category: "Technology",
+      price: "$40",
+      description: "This event has been completed successfully.",
+      isCompleted: true,
+      registrationOpen: false
     }
   ];
 
@@ -98,8 +123,13 @@ const Events = () => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          event.description.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = categoryFilter === "all" || event.category.toLowerCase() === categoryFilter.toLowerCase();
-    return matchesSearch && matchesCategory;
+    const matchesLocation = locationFilter === "all" || event.city.toLowerCase() === locationFilter.toLowerCase();
+    const matchesCountry = countryFilter === "all" || event.country.toLowerCase() === countryFilter.toLowerCase();
+    return matchesSearch && matchesCategory && matchesLocation && matchesCountry;
   });
+
+  const uniqueCountries = [...new Set(events.map(event => event.country))];
+  const uniqueCities = [...new Set(events.map(event => event.city))];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
@@ -159,6 +189,28 @@ const Events = () => {
                 <SelectItem value="entertainment">Entertainment</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={countryFilter} onValueChange={setCountryFilter}>
+              <SelectTrigger className="w-full md:w-48 bg-white/10 border-purple-300/30 text-white">
+                <SelectValue placeholder="Country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Countries</SelectItem>
+                {uniqueCountries.map(country => (
+                  <SelectItem key={country} value={country.toLowerCase()}>{country}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={locationFilter} onValueChange={setLocationFilter}>
+              <SelectTrigger className="w-full md:w-48 bg-white/10 border-purple-300/30 text-white">
+                <SelectValue placeholder="City" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Cities</SelectItem>
+                {uniqueCities.map(city => (
+                  <SelectItem key={city} value={city.toLowerCase()}>{city}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -175,11 +227,16 @@ const Events = () => {
               </div>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-2">
-                  <Badge variant="secondary" className="bg-purple-800/50 text-purple-200">
-                    {event.category}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-purple-800/50 text-purple-200">
+                      {event.category}
+                    </Badge>
+                    {event.isCompleted && (
+                      <Badge className="bg-red-600 text-white text-xs">Completed</Badge>
+                    )}
+                  </div>
                   <span className="text-sm font-semibold text-green-300">
-                    {event.price}
+                    {event.price === "Free" ? "Free" : `₹${parseFloat(event.price.replace('$', '')) * 75}`}
                   </span>
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-purple-200 transition-colors">
@@ -191,11 +248,11 @@ const Events = () => {
                 <div className="space-y-2 text-purple-100 mb-4">
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.date} • {event.time}</span>
+                    <span className="text-sm">{event.date}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.location}</span>
+                    <span className="text-sm">{event.city}, {event.country}</span>
                   </div>
                   <div className="flex items-center">
                     <Users className="h-4 w-4 mr-2" />
@@ -204,7 +261,7 @@ const Events = () => {
                 </div>
                 <Link to={`/events/${event.id}`}>
                   <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
-                    View Details
+                    {event.isCompleted ? "View Details" : "View & Register"}
                   </Button>
                 </Link>
               </CardContent>
@@ -219,6 +276,8 @@ const Events = () => {
               onClick={() => {
                 setSearchTerm("");
                 setCategoryFilter("all");
+                setLocationFilter("all");
+                setCountryFilter("all");
               }}
               variant="outline"
               className="border-purple-300 text-purple-100 hover:bg-purple-800/50"

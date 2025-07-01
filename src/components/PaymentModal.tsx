@@ -58,76 +58,121 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
       return;
     }
 
-    // Load Razorpay script
-    const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.async = true;
-    script.onload = () => {
-      const options = {
-        key: "rzp_test_9WzaAMmzjGhPDT", // Replace with your actual Razorpay key
-        amount: amount * 100, // Amount in paise
-        currency: "INR",
-        name: "EventSpark",
-        description: `Registration for ${eventTitle}`,
-        image: "/favicon.ico",
-        handler: function (response: any) {
-          console.log("Payment successful:", response);
-          toast({
-            title: "Payment Successful!",
-            description: `Payment ID: ${response.razorpay_payment_id}`,
-          });
-          onSuccess();
-          onClose();
-          setIsProcessing(false);
-        },
-        prefill: {
-          name: userDetails.name,
-          email: userDetails.email,
-          contact: userDetails.phone,
-        },
-        notes: {
-          address: userDetails.address,
-          event: eventTitle
-        },
-        theme: {
-          color: "#8B5CF6",
-        },
-        method: {
-          upi: true,
-          card: true,
-          netbanking: true,
-          wallet: true
-        },
-        modal: {
-          ondismiss: function() {
-            setIsProcessing(false);
-            toast({
-              title: "Payment Cancelled",
-              description: "Payment was cancelled by user.",
-              variant: "destructive"
-            });
-          }
-        }
+    // Check if Razorpay script is already loaded
+    if (window.Razorpay) {
+      initializeRazorpay();
+    } else {
+      // Load Razorpay script
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => {
+        initializeRazorpay();
       };
+      
+      script.onerror = () => {
+        setIsProcessing(false);
+        toast({
+          title: "Payment Error",
+          description: "Failed to load payment gateway. Please try again.",
+          variant: "destructive"
+        });
+      };
+      
+      document.head.appendChild(script);
+    }
+  };
 
-      const rzp = new window.Razorpay(options);
-      rzp.open();
-    };
+  const initializeRazorpay = () => {
+    const amount = parseFloat(price.replace('$', '')) * 75;
     
-    script.onerror = () => {
+    const options = {
+      key: "rzp_test_9WzaAMmzjGhPDT", // Test key - replace with your actual key
+      amount: amount * 100, // Amount in paise
+      currency: "INR",
+      name: "EventSpark",
+      description: `Registration for ${eventTitle}`,
+      image: "/favicon.ico",
+      handler: function (response: any) {
+        console.log("Payment successful:", response);
+        setIsProcessing(false);
+        toast({
+          title: "Payment Successful!",
+          description: `Payment ID: ${response.razorpay_payment_id}`,
+        });
+        onSuccess();
+        onClose();
+      },
+      prefill: {
+        name: userDetails.name,
+        email: userDetails.email,
+        contact: userDetails.phone,
+      },
+      notes: {
+        address: userDetails.address,
+        event: eventTitle
+      },
+      theme: {
+        color: "#8B5CF6",
+      },
+      method: {
+        upi: true,
+        card: true,
+        netbanking: true,
+        wallet: true
+      },
+      modal: {
+        ondismiss: function() {
+          setIsProcessing(false);
+          console.log("Payment dismissed by user");
+        },
+        escape: true,
+        backdropclose: false
+      }
+    };
+
+    try {
+      const rzp = new window.Razorpay(options);
+      
+      rzp.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error);
+        setIsProcessing(false);
+        toast({
+          title: "Payment Failed",
+          description: `Error: ${response.error.description || 'Payment could not be processed'}`,
+          variant: "destructive"
+        });
+      });
+
+      rzp.open();
+    } catch (error) {
+      console.error('Razorpay initialization error:', error);
       setIsProcessing(false);
       toast({
         title: "Payment Error",
-        description: "Failed to load payment gateway. Please try again.",
+        description: "Failed to initialize payment. Please try again.",
         variant: "destructive"
       });
-    };
-    
-    document.head.appendChild(script);
+    }
+  };
+
+  const resetForm = () => {
+    setUserDetails({
+      name: "",
+      email: "",
+      phone: "",
+      address: ""
+    });
+    setIsProcessing(false);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="bg-white/95 backdrop-blur-sm border-purple-300/20 max-w-md">
         <DialogHeader>
           <DialogTitle className="text-purple-900">Complete Registration</DialogTitle>
@@ -145,6 +190,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
               onChange={(e) => setUserDetails(prev => ({ ...prev, name: e.target.value }))}
               className="border-purple-300"
               required
+              disabled={isProcessing}
             />
           </div>
           
@@ -157,6 +203,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
               onChange={(e) => setUserDetails(prev => ({ ...prev, email: e.target.value }))}
               className="border-purple-300"
               required
+              disabled={isProcessing}
             />
           </div>
           
@@ -169,6 +216,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
               onChange={(e) => setUserDetails(prev => ({ ...prev, phone: e.target.value }))}
               className="border-purple-300"
               required
+              disabled={isProcessing}
             />
           </div>
           
@@ -179,6 +227,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
               value={userDetails.address}
               onChange={(e) => setUserDetails(prev => ({ ...prev, address: e.target.value }))}
               className="border-purple-300"
+              disabled={isProcessing}
             />
           </div>
 
@@ -197,7 +246,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
           <div className="flex gap-3">
             <Button
               variant="outline"
-              onClick={onClose}
+              onClick={handleClose}
               className="flex-1"
               disabled={isProcessing}
             >

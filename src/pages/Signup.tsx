@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,9 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { signUpSchema } from "@/lib/validation";
+import { z } from "zod";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -21,54 +23,81 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp, isSupabaseConfigured } = useAuth();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const validateForm = () => {
+    try {
+      signUpSchema.parse(formData);
+      setErrors({});
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        const newErrors: Record<string, string> = {};
+        error.errors.forEach((err) => {
+          if (err.path[0]) {
+            newErrors[err.path[0] as string] = err.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+      return false;
+    }
+  };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!validateForm()) {
+      toast({
+        title: "Validation Error",
+        description: "Please correct the errors in the form.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
 
-    // Basic validation
-    if (formData.password !== formData.confirmPassword) {
+    try {
+      const { data, error } = await signUp(
+        formData.email, 
+        formData.password, 
+        formData.fullName, 
+        formData.phone
+      );
+      
+      if (error) {
+        toast({
+          title: "Signup failed",
+          description: error.message || "Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Account created!",
+          description: isSupabaseConfigured 
+            ? "Welcome to EventSpark! Please check your email for verification."
+            : "Welcome to EventSpark! You're now logged in (Demo Mode).",
+        });
+        navigate("/dashboard");
+      }
+    } catch (error) {
       toast({
-        title: "Password mismatch",
-        description: "Passwords do not match. Please try again.",
+        title: "Signup failed",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
+    } finally {
       setIsLoading(false);
-      return;
     }
-
-    if (!formData.agreeToTerms) {
-      toast({
-        title: "Terms required",
-        description: "Please accept the terms and conditions to continue.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    // Simulate account creation
-    setTimeout(() => {
-      localStorage.setItem("user", JSON.stringify({ 
-        email: formData.email, 
-        name: formData.fullName,
-        id: "user123",
-        phone: formData.phone 
-      }));
-      toast({
-        title: "Account created!",
-        description: "Welcome to EventSpark! Please check your email for verification.",
-      });
-      navigate("/dashboard");
-      setIsLoading(false);
-    }, 1500);
   };
 
   return (
@@ -82,6 +111,13 @@ const Signup = () => {
           </Link>
           <h1 className="text-3xl font-bold text-white">Join EventSpark</h1>
           <p className="text-purple-200 mt-2">Create your account to get started</p>
+          {!isSupabaseConfigured && (
+            <div className="mt-2 p-2 bg-yellow-600/20 border border-yellow-500/30 rounded-md">
+              <p className="text-yellow-200 text-sm">
+                Demo Mode: Supabase not configured
+              </p>
+            </div>
+          )}
         </div>
 
         <Card className="bg-white/10 backdrop-blur-sm border-purple-300/20">
@@ -104,11 +140,14 @@ const Signup = () => {
                     placeholder="John Doe"
                     value={formData.fullName}
                     onChange={handleInputChange}
-                    className="pl-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                    className={`pl-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300 ${errors.fullName ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {errors.fullName && <p className="text-red-400 text-sm">{errors.fullName}</p>}
               </div>
+              
+              
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-purple-200">Email</Label>
                 <div className="relative">
@@ -120,11 +159,13 @@ const Signup = () => {
                     placeholder="john@example.com"
                     value={formData.email}
                     onChange={handleInputChange}
-                    className="pl-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                    className={`pl-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300 ${errors.email ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {errors.email && <p className="text-red-400 text-sm">{errors.email}</p>}
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="phone" className="text-purple-200">Phone Number</Label>
                 <div className="relative">
@@ -136,11 +177,13 @@ const Signup = () => {
                     placeholder="+1 (555) 123-4567"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="pl-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                    className={`pl-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300 ${errors.phone ? 'border-red-500' : ''}`}
                     required
                   />
                 </div>
+                {errors.phone && <p className="text-red-400 text-sm">{errors.phone}</p>}
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="password" className="text-purple-200">Password</Label>
                 <div className="relative">
@@ -152,7 +195,7 @@ const Signup = () => {
                     placeholder="••••••••"
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                    className={`pl-10 pr-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300 ${errors.password ? 'border-red-500' : ''}`}
                     required
                   />
                   <button
@@ -163,7 +206,9 @@ const Signup = () => {
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.password && <p className="text-red-400 text-sm">{errors.password}</p>}
               </div>
+              
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword" className="text-purple-200">Confirm Password</Label>
                 <div className="relative">
@@ -175,7 +220,7 @@ const Signup = () => {
                     placeholder="••••••••"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="pl-10 pr-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300"
+                    className={`pl-10 pr-10 bg-white/5 border-purple-300/30 text-white placeholder:text-purple-300 ${errors.confirmPassword ? 'border-red-500' : ''}`}
                     required
                   />
                   <button
@@ -186,7 +231,9 @@ const Signup = () => {
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+                {errors.confirmPassword && <p className="text-red-400 text-sm">{errors.confirmPassword}</p>}
               </div>
+              
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="terms"
@@ -206,6 +253,7 @@ const Signup = () => {
                   </Link>
                 </Label>
               </div>
+              {errors.agreeToTerms && <p className="text-red-400 text-sm">{errors.agreeToTerms}</p>}
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <Button

@@ -50,7 +50,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             user_metadata: {
               full_name: userData.name || userData.fullName,
               phone: userData.phone
-            }
+            },
+            app_metadata: {},
+            aud: 'authenticated',
+            created_at: new Date().toISOString(),
+            email_confirmed_at: new Date().toISOString(),
+            phone_confirmed_at: null,
+            confirmed_at: new Date().toISOString(),
+            last_sign_in_at: new Date().toISOString(),
+            role: 'authenticated',
+            updated_at: new Date().toISOString()
           } as User);
         } catch (error) {
           console.error('Error parsing local user data:', error);
@@ -96,7 +105,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user_metadata: {
           full_name: fullName,
           phone: phone
-        }
+        },
+        app_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        phone_confirmed_at: null,
+        confirmed_at: new Date().toISOString(),
+        last_sign_in_at: new Date().toISOString(),
+        role: 'authenticated',
+        updated_at: new Date().toISOString()
       } as User);
       return { data: { user: userData }, error: null };
     }
@@ -128,7 +146,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: userData.email,
         user_metadata: {
           full_name: userData.name
-        }
+        },
+        app_metadata: {},
+        aud: 'authenticated',
+        created_at: new Date().toISOString(),
+        email_confirmed_at: new Date().toISOString(),
+        phone_confirmed_at: null,
+        confirmed_at: new Date().toISOString(),
+        last_sign_in_at: new Date().toISOString(),
+        role: 'authenticated',
+        updated_at: new Date().toISOString()
       } as User);
       return { data: { user: userData }, error: null };
     }

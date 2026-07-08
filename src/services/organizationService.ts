@@ -1,5 +1,6 @@
 import { supabase } from '@/contexts/AuthContext';
 import { Database } from '@/integrations/supabase/types';
+import { Permission, hasPermission, Role } from '@/types/rbac';
 
 export type Organization = Database['public']['Tables']['organizations']['Row'];
 export type OrganizationMember = Database['public']['Tables']['organization_members']['Row'];
@@ -70,4 +71,28 @@ export const createOrganization = async (name: string, userId: string): Promise<
   }
 
   return { ...org, role: 'owner' };
+};
+
+export const updateOrganization = async (
+  organizationId: string, 
+  updates: Partial<Organization>, 
+  currentRole: Role | string
+): Promise<Organization> => {
+  if (!hasPermission(currentRole, Permission.MANAGE_SETTINGS)) {
+    throw new Error('You do not have permission to update organization settings');
+  }
+
+  const { data, error } = await supabase
+    .from('organizations')
+    .update(updates)
+    .eq('id', organizationId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error updating organization:', error);
+    throw error;
+  }
+
+  return data as Organization;
 };

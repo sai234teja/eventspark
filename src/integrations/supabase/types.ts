@@ -9,7 +9,339 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      audit_logs: {
+        Row: {
+          id: string
+          organization_id: string
+          user_id: string | null
+          action: string
+          entity_type: string
+          entity_id: string | null
+          old_values: Json | null
+          new_values: Json | null
+          ip_address: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          user_id?: string | null
+          action: string
+          entity_type: string
+          entity_id?: string | null
+          old_values?: Json | null
+          new_values?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          user_id?: string | null
+          action?: string
+          entity_type?: string
+          entity_id?: string | null
+          old_values?: Json | null
+          new_values?: Json | null
+          ip_address?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+      }
+      events: {
+        Row: {
+          id: number
+          title: string
+          date: string
+          time: string
+          location: string
+          city: string
+          country: string
+          attendees: number
+          maxCapacity: number
+          image: string
+          category: string
+          price: string
+          description: string
+          organizer: string
+          organizer_id: string
+          isCompleted: boolean
+          registrationOpen: boolean
+          organization_id: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: number
+          title: string
+          date: string
+          time: string
+          location: string
+          city: string
+          country: string
+          attendees?: number
+          maxCapacity: number
+          image: string
+          category: string
+          price: string
+          description: string
+          organizer: string
+          organizer_id: string
+          isCompleted?: boolean
+          registrationOpen?: boolean
+          organization_id?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          title?: string
+          date?: string
+          time?: string
+          location?: string
+          city?: string
+          country?: string
+          attendees?: number
+          maxCapacity?: number
+          image?: string
+          category?: string
+          price?: string
+          description?: string
+          organizer?: string
+          organizer_id?: string
+          isCompleted?: boolean
+          registrationOpen?: boolean
+          organization_id?: string | null
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      organization_invites: {
+        Row: {
+          id: string
+          organization_id: string
+          email: string
+          role: string
+          token: string
+          invited_by: string | null
+          expires_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          email: string
+          role: string
+          token: string
+          invited_by?: string | null
+          expires_at: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          email?: string
+          role?: string
+          token?: string
+          invited_by?: string | null
+          expires_at?: string
+          created_at?: string
+        }
+      }
+      organization_members: {
+        Row: {
+          id: string
+          organization_id: string
+          user_id: string
+          role: string
+          joined_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          user_id: string
+          role: string
+          joined_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          user_id?: string
+          role?: string
+          joined_at?: string
+        }
+      }
+      organization_settings: {
+        Row: {
+          organization_id: string
+          logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          website: string | null
+          timezone: string | null
+          feature_flags: Json | null
+          updated_at: string
+        }
+        Insert: {
+          organization_id: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          website?: string | null
+          timezone?: string | null
+          feature_flags?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          organization_id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          website?: string | null
+          timezone?: string | null
+          feature_flags?: Json | null
+          updated_at?: string
+        }
+      }
+      organizations: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          created_by: string | null
+          created_at: string
+          updated_at: string
+          deleted_at: string | null
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+        Update: {
+          id?: string
+          name?: string
+          slug?: string
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+          deleted_at?: string | null
+        }
+      }
+      payments: {
+        Row: {
+          id: string
+          organization_id: string | null
+          registration_id: string | null
+          amount: number
+          status: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id?: string | null
+          registration_id?: string | null
+          amount: number
+          status: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string | null
+          registration_id?: string | null
+          amount?: number
+          status?: string
+          created_at?: string
+        }
+      }
+      profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          avatar_url: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          avatar_url?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      registrations: {
+        Row: {
+          id: string
+          event_id: string | null
+          user_id: string | null
+          organization_id: string | null
+          registration_data: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          event_id?: string | null
+          user_id?: string | null
+          organization_id?: string | null
+          registration_data?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          event_id?: string | null
+          user_id?: string | null
+          organization_id?: string | null
+          registration_data?: Json | null
+          created_at?: string
+        }
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          organization_id: string
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
+          plan_id: string
+          status: string
+          current_period_end: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          plan_id: string
+          status: string
+          current_period_end?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
+          plan_id?: string
+          status?: string
+          current_period_end?: string | null
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never

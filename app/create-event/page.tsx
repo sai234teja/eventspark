@@ -12,6 +12,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar, MapPin, Users, Clock, Sparkles, Upload } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRequirePermission } from "@/hooks/useRBAC";
+import { Permission } from "@/types/rbac";
 
 const CreateEvent = () => {
   const [formData, setFormData] = useState({
@@ -30,6 +32,16 @@ const CreateEvent = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  
+  const { isAuthorized, isLoading: isAuthLoading } = useRequirePermission(Permission.CREATE_EVENT);
+
+  if (isAuthLoading) {
+    return <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 flex items-center justify-center text-white">Loading...</div>;
+  }
+
+  if (!isAuthorized) {
+    return null; // Redirect is handled by the hook
+  }
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));

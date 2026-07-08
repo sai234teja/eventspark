@@ -1,5 +1,6 @@
 
 import { supabase } from '@/contexts/AuthContext';
+import { Permission, hasPermission, Role } from '@/types/rbac';
 
 export interface Event {
   id: number;
@@ -58,7 +59,11 @@ export const getEventById = async (id: number, organizationId: string): Promise<
   return data;
 };
 
-export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'organizer_id' | 'organization_id'>, organizationId: string) => {
+export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'organizer_id' | 'organization_id'>, organizationId: string, role: Role | string) => {
+  if (!hasPermission(role, Permission.CREATE_EVENT)) {
+    throw new Error('You do not have permission to create events');
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -84,7 +89,11 @@ export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | '
   return data;
 };
 
-export const updateEvent = async (id: number, updates: Partial<Event>, organizationId: string) => {
+export const updateEvent = async (id: number, updates: Partial<Event>, organizationId: string, role: Role | string) => {
+  if (!hasPermission(role, Permission.EDIT_EVENT)) {
+    throw new Error('You do not have permission to edit events');
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -108,7 +117,11 @@ export const updateEvent = async (id: number, updates: Partial<Event>, organizat
   return data;
 };
 
-export const registerForEvent = async (eventId: number, registrationData: any, organizationId: string) => {
+export const registerForEvent = async (eventId: number, registrationData: any, organizationId: string, role: Role | string) => {
+  if (!hasPermission(role, Permission.REGISTER_FOR_EVENT)) {
+    throw new Error('You do not have permission to register for events');
+  }
+
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {

@@ -21,6 +21,8 @@ import {
   Trash2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { RoleGuard } from "@/components/RoleGuard";
+import { Permission } from "@/types/rbac";
 
 interface Event {
   id: number;
@@ -259,11 +261,13 @@ const Dashboard = () => {
                 Browse Events
               </Button>
             </Link>
-            <Link href="/create-event">
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
-                Create Event
-              </Button>
-            </Link>
+            <RoleGuard require={Permission.CREATE_EVENT}>
+              <Link href="/create-event">
+                <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600">
+                  Create Event
+                </Button>
+              </Link>
+            </RoleGuard>
           </div>
         </div>
       </nav>
@@ -389,20 +393,24 @@ const Dashboard = () => {
                             {event.category}
                           </Badge>
                           <div className="flex space-x-2">
-                            <Button size="sm" variant="outline" className="border-purple-300 text-purple-100">
-                              <Edit className="h-3 w-3" />
-                            </Button>
+                            <RoleGuard require={Permission.EDIT_EVENT}>
+                              <Button size="sm" variant="outline" className="border-purple-300 text-purple-100">
+                                <Edit className="h-3 w-3" />
+                              </Button>
+                            </RoleGuard>
                             <Button size="sm" variant="outline" className="border-purple-300 text-purple-100">
                               <Eye className="h-3 w-3" />
                             </Button>
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="border-red-300 text-red-300 hover:bg-red-600"
-                              onClick={() => handleDeleteEvent(event.id)}
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
+                            <RoleGuard require={Permission.DELETE_EVENT}>
+                              <Button 
+                                size="sm" 
+                                variant="outline" 
+                                className="border-red-300 text-red-300 hover:bg-red-600"
+                                onClick={() => handleDeleteEvent(event.id)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </RoleGuard>
                           </div>
                         </div>
                         <CardTitle className="text-white">{event.title}</CardTitle>

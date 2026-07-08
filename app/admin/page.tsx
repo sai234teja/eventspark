@@ -2,103 +2,104 @@
 
 import React, { useEffect, useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CreditCard, ScrollText, Calendar as CalendarIcon } from "lucide-react";
-import { supabase } from "@/contexts/AuthContext";
+import { getDashboardSummary, DashboardSummary } from "@/services/adminService";
+import { getAuditLogs, AuditLog } from "@/services/auditService";
+import { StatCard } from "@/components/ui/StatCard";
+import { SectionHeader } from "@/components/ui/SectionHeader";
+import { Users, Calendar, Mail, CreditCard, Loader2 } from "lucide-react";
+import { format } from "date-fns";
 
 const AdminDashboard = () => {
-  const { activeOrganization } = useTenant();
-  const [stats, setStats] = useState({
-    members: 0,
-    events: 0,
-    pendingInvites: 0,
-    recentAudits: 0
-  });
+  const { activeOrganization, currentRole } = useTenant();
+  const [summary, setSummary] = useState<DashboardSummary | null>(null);
+  const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (activeOrganization) {
-      const fetchStats = async () => {
-        // Since we don't have all services fully implemented yet, we can do some direct queries 
-        // or just placeholders. Let's do simple counts.
-        try {
-          const { count: membersCount } = await supabase
-            .from('organization_members')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', activeOrganization.id);
-            
-          const { count: eventsCount } = await supabase
-            .from('events')
-            .select('*', { count: 'exact', head: true })
-            .eq('organization_id', activeOrganization.id);
-
-          setStats({
-            members: membersCount || 0,
-            events: eventsCount || 0,
-            pendingInvites: 0, // Placeholder until invite service is connected
-            recentAudits: 0 // Placeholder
-          });
-        } catch (error) {
-          console.error("Failed to fetch admin stats", error);
-        }
-      };
-
-      fetchStats();
+    if (activeOrganization && currentRole) {
+      loadDashboard();
     }
-  }, [activeOrganization]);
+  }, [activeOrganization, currentRole]);
+
+  const loadDashboard = async () => {
+    try {
+      setLoading(true);
+      const [summaryData, logsData] = await Promise.all([
+        getDashboardSummary(activeOrganization!.id, currentRole!),
+        getAuditLogs(activeOrganization!.id, currentRole!, { page: 1, limit: 5 })
+      ]);
+      setSummary(summaryData);
+      setRecentLogs(logsData.logs);
+    } catch (error) {
+      console.error("Failed to load dashboard:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || !summary) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">Admin Overview</h1>
-        <p className="text-slate-400 mt-2">
-          Manage {activeOrganization?.name || 'your organization'} settings, team members, and billing.
-        </p>
-      </div>
+    <div className="space-y-8 max-w-5xl">
+      <SectionHeader 
+        title="Admin Dashboard" 
+        description={`Overview for ${activeOrganization?.name}`} 
+      />
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Total Members</CardTitle>
-            <Users className="h-4 w-4 text-purple-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.members}</div>
-            <p className="text-xs text-slate-500">Active users in organization</p>
-          </CardContent>
-        </Card>
-        
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Total Events</CardTitle>
-            <CalendarIcon className="h-4 w-4 text-purple-400" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-white">{stats.events}</div>
-            <p className="text-xs text-slate-500">Events managed</p>
-          </CardContent>
-        </Card>
+        <StatCard
+          title="Total Members"
+          value={summary.membersCount}
+          icon={Users}
+        />
+        <StatCard
+          title="Active Events"
+          value={summary.eventsCount}
+          icon={Calendar}
+        />
+        <StatCard
+          title="Pending Invites"
+          value={summary.pendingInvitesCount}
+          icon={Mail}
+        />
+        <StatCard
+          title="Current Plan"
+          value={summary.subscriptionPlan}
+          icon={CreditCard}
+        />
+      </div>
 
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Pending Invites</CardTitle>
-            <Users className="h-4 w-4 text-slate-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-300">{stats.pendingInvites}</div>
-            <p className="text-xs text-slate-500">Awaiting acceptance</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-slate-900 border-slate-800">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-slate-300">Subscription</CardTitle>
-            <CreditCard className="h-4 w-4 text-slate-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-slate-300">Free</div>
-            <p className="text-xs text-slate-500">Upgrade for more features</p>
-          </CardContent>
-        </Card>
+      <div className="mt-8">
+        <h3 className="text-lg font-medium text-white mb-4">Recent Activity</h3>
+        <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
+          {recentLogs.length === 0 ? (
+            <div className="p-6 text-center text-slate-500">No recent activity found.</div>
+          ) : (
+            <div className="divide-y divide-slate-800">
+              {recentLogs.map((log) => (
+                <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors">
+                  <div>
+                    <p className="text-sm font-medium text-slate-300">
+                      {log.profiles?.email || 'System'} <span className="text-slate-500 font-normal">performed</span> {log.action}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1">
+                      {log.entity_type} {log.entity_id ? `(${log.entity_id.substring(0, 8)})` : ''}
+                    </p>
+                  </div>
+                  <span className="text-xs text-slate-500 whitespace-nowrap ml-4">
+                    {format(new Date(log.created_at), 'MMM d, h:mm a')}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

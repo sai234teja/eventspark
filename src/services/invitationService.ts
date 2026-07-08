@@ -57,3 +57,22 @@ export const acceptInvitation = async (token: string, userId: string): Promise<v
     .delete()
     .eq('id', invite.id);
 };
+
+export const inviteUser = async (organizationId: string, email: string, role: string, currentRole: string) => {
+  // Simple mock invite logic for now
+  if (!supabase) throw new Error('Supabase not configured');
+  
+  const { error } = await supabase
+    .from('organization_invites')
+    .insert([{
+      organization_id: organizationId,
+      email: email,
+      role: role,
+      token: Math.random().toString(36).substring(2) + Date.now().toString(36),
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+    }]);
+
+  if (error) {
+    throw new Error('Failed to create invitation: ' + error.message);
+  }
+};

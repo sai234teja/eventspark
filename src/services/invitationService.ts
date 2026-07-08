@@ -1,0 +1,59 @@
+import { supabase } from '@/contexts/AuthContext';
+import { Database } from '@/integrations/supabase/types';
+
+export type OrganizationInvite = Database['public']['Tables']['organization_invites']['Row'];
+
+export const getPendingInvitations = async (email: string): Promise<OrganizationInvite[]> => {
+  if (!supabase) return [];
+  
+  const { data, error } = await supabase
+    .from('organization_invites')
+    .select('*')
+    .eq('email', email)
+    .gt('expires_at', new Date().toISOString());
+
+  if (error) {
+    console.error('Error fetching invitations:', error);
+    throw new Error('Failed to fetch invitations');
+  }
+
+  return data || [];
+};
+
+export const acceptInvitation = async (token: string, userId: string): Promise<void> => {
+  if (!supabase) throw new Error('Supabase not configured');
+  
+  // 1. Get the invite
+  const { data: invite, error: fetchError } = await supabase
+    .from('organization_invites')
+    .select('*')
+    .eq('token', token)
+    .single();
+
+  if (fetchError || !invite) {
+    throw new Error('Invalid or expired invitation');
+  }
+
+  if (new Date(invite.expires_at) < new Date()) {
+    throw new Error('Invitation has expired');
+  }
+
+  // 2. Add user to organization_members
+  const { error: insertError } = await supabase
+    .from('organization_members')
+    .insert([{ 
+      organization_id: invite.organization_id, 
+      user_id: userId, 
+      role: invite.role 
+    }]);
+
+  if (insertError) {
+    throw new Error('Failed to join organization');
+  }
+
+  // 3. Delete the invite so it can't be reused
+  await supabase
+    .from('organization_invites')
+    .delete()
+    .eq('id', invite.id);
+};

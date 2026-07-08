@@ -1,1 +1,1 @@
-{"/events/page":"/events","/page":"/","/_not-found/page":"/_not-found","/events/[id]/page":"/events/[id]","/create-event/page":"/create-event","/login/page":"/login","/dashboard/page":"/dashboard","/signup/page":"/signup"}
+{"/create-event/page":"/create-event","/_not-found/page":"/_not-found","/onboarding/page":"/onboarding","/events/[id]/page":"/events/[id]","/login/page":"/login","/signup/page":"/signup","/dashboard/page":"/dashboard","/page":"/","/events/page":"/events"}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -142,6 +143,7 @@ const Events = () => {
             <span className="text-2xl font-bold text-white">EventSpark</span>
           </Link>
           <div className="flex items-center space-x-4">
+            <OrganizationSwitcher />
             <Link href="/dashboard">
               <Button variant="ghost" className="text-white hover:bg-white/10">
                 Dashboard

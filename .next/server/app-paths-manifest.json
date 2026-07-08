@@ -1,11 +1,11 @@
 {
   "/create-event/page": "app/create-event/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/_not-found/page": "app/_not-found/page.js",
+  "/events/page": "app/events/page.js",
   "/onboarding/page": "app/onboarding/page.js",
   "/events/[id]/page": "app/events/[id]/page.js",
-  "/login/page": "app/login/page.js",
-  "/signup/page": "app/signup/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
   "/page": "app/page.js",
-  "/events/page": "app/events/page.js"
+  "/login/page": "app/login/page.js",
+  "/signup/page": "app/signup/page.js"
 }

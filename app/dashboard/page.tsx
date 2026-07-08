@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -252,6 +253,7 @@ const Dashboard = () => {
             <span className="text-2xl font-bold text-white">EventSpark</span>
           </Link>
           <div className="flex items-center space-x-4">
+            <OrganizationSwitcher />
             <Link href="/events">
               <Button variant="ghost" className="text-white hover:bg-white/10">
                 Browse Events

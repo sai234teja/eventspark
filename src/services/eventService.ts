@@ -19,14 +19,18 @@ export interface Event {
   organizer_id: string;
   isCompleted: boolean;
   registrationOpen: boolean;
+  organization_id: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
-export const getEvents = async (): Promise<Event[]> => {
+export const getEvents = async (organizationId: string): Promise<Event[]> => {
   const { data, error } = await supabase
     .from('events')
     .select('*')
+    .eq('organization_id', organizationId)
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -37,11 +41,13 @@ export const getEvents = async (): Promise<Event[]> => {
   return data || [];
 };
 
-export const getEventById = async (id: number): Promise<Event | null> => {
+export const getEventById = async (id: number, organizationId: string): Promise<Event | null> => {
   const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('id', id)
+    .eq('organization_id', organizationId)
+    .is('deleted_at', null)
     .single();
 
   if (error) {
@@ -52,7 +58,7 @@ export const getEventById = async (id: number): Promise<Event | null> => {
   return data;
 };
 
-export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'organizer_id'>) => {
+export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'deleted_at' | 'organizer_id' | 'organization_id'>, organizationId: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -64,6 +70,7 @@ export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | '
     .insert([{
       ...eventData,
       organizer_id: user.id,
+      organization_id: organizationId,
       attendees: 0,
     }])
     .select()
@@ -77,7 +84,7 @@ export const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | '
   return data;
 };
 
-export const updateEvent = async (id: number, updates: Partial<Event>) => {
+export const updateEvent = async (id: number, updates: Partial<Event>, organizationId: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -88,7 +95,8 @@ export const updateEvent = async (id: number, updates: Partial<Event>) => {
     .from('events')
     .update(updates)
     .eq('id', id)
-    .eq('organizer_id', user.id) // Ensure user can only update their own events
+    .eq('organization_id', organizationId)
+    .is('deleted_at', null)
     .select()
     .single();
 
@@ -100,7 +108,7 @@ export const updateEvent = async (id: number, updates: Partial<Event>) => {
   return data;
 };
 
-export const registerForEvent = async (eventId: number, registrationData: any) => {
+export const registerForEvent = async (eventId: number, registrationData: any, organizationId: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -112,6 +120,7 @@ export const registerForEvent = async (eventId: number, registrationData: any) =
     .insert([{
       event_id: eventId,
       user_id: user.id,
+      organization_id: organizationId,
       registration_data: registrationData,
     }])
     .select()
@@ -125,7 +134,7 @@ export const registerForEvent = async (eventId: number, registrationData: any) =
   return data;
 };
 
-export const getUserRegistrations = async () => {
+export const getUserRegistrations = async (organizationId: string) => {
   const { data: { user } } = await supabase.auth.getUser();
   
   if (!user) {
@@ -145,10 +154,12 @@ export const getUserRegistrations = async () => {
         city,
         country,
         image,
-        category
+        category,
+        organization_id
       )
     `)
-    .eq('user_id', user.id);
+    .eq('user_id', user.id)
+    .eq('organization_id', organizationId);
 
   if (error) {
     console.error('Error fetching user registrations:', error);

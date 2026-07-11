@@ -36,7 +36,7 @@ export const useCheckInTicket = () => {
       toast.success('Ticket checked in successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.tickets(organizationId) });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to check in ticket');
     }
   });
@@ -52,7 +52,7 @@ export const useCancelTicket = () => {
       toast.success('Ticket cancelled');
       queryClient.invalidateQueries({ queryKey: queryKeys.tickets(organizationId) });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to cancel ticket');
     }
   });

@@ -22,7 +22,7 @@ export async function issueTicketAction(organizationId: string, eventId: number,
     }
 
     return { success: true, ticket: data };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'An error occurred' };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'An error occurred' };
   }
 }

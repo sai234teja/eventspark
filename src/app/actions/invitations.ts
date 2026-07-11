@@ -24,7 +24,7 @@ export async function acceptInvitationAction(token: string, userId: string) {
     }
 
     return { success: true };
-  } catch (err: any) {
-    return { success: false, error: err.message || 'An error occurred' };
+  } catch (err: unknown) {
+    return { success: false, error: err instanceof Error ? err.message : 'An error occurred' };
   }
 }

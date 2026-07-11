@@ -8,8 +8,8 @@ export interface AuditLog {
   action: string;
   entity_type: string;
   entity_id: string | null;
-  old_values: any | null;
-  new_values: any | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
   ip_address: string | null;
   user_agent: string | null;
   created_at: string;

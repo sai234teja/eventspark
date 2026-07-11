@@ -117,7 +117,7 @@ export const updateEvent = async (id: number, updates: Partial<Event>, organizat
   return data;
 };
 
-export const registerForEvent = async (eventId: number, registrationData: any, organizationId: string, role: Role | string) => {
+export const registerForEvent = async (eventId: number, registrationData: Record<string, unknown>, organizationId: string, role: Role | string) => {
   if (!hasPermission(role, Permission.REGISTER_FOR_EVENT)) {
     throw new Error('You do not have permission to register for events');
   }

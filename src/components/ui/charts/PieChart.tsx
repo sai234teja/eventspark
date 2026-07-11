@@ -13,7 +13,7 @@ import { LoadingChart } from './LoadingChart';
 import { EmptyChartState } from './EmptyChartState';
 
 interface PieChartProps {
-  data: any[];
+  data: Record<string, unknown>[];
   nameKey: string;
   dataKey: string;
   isLoading?: boolean;

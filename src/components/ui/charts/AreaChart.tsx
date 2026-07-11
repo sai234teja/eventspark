@@ -14,7 +14,7 @@ import { LoadingChart } from './LoadingChart';
 import { EmptyChartState } from './EmptyChartState';
 
 interface AreaChartProps {
-  data: any[];
+  data: Record<string, unknown>[];
   xDataKey: string;
   yDataKey: string;
   isLoading?: boolean;

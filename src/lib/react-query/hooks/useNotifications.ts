@@ -21,7 +21,7 @@ export const useResendNotification = () => {
       toast.success('Notification sent successfully');
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications(organizationId) });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message || 'Failed to resend notification');
     }
   });

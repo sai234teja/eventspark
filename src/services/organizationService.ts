@@ -35,9 +35,9 @@ export const getUserOrganizations = async (userId: string): Promise<Organization
   }
 
   // The join returns organizations as an object or array. Since it's a many-to-one from member to org, it's a single object.
-  return (data || []).map((member: any) => ({
-    ...member.organizations,
-    role: member.role,
+  return (data || []).map((member: { organizations: unknown, role: unknown }) => ({
+    ...(member.organizations as Organization),
+    role: member.role as string,
   }));
 };
 

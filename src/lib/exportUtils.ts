@@ -1,4 +1,4 @@
-export const exportToCSV = (data: any[], filename: string) => {
+export const exportToCSV = (data: Record<string, unknown>[], filename: string) => {
   if (!data || data.length === 0) {
     console.warn("No data to export");
     return;
@@ -24,8 +24,9 @@ export const exportToCSV = (data: any[], filename: string) => {
         }
         
         // Escape quotes and commas
-        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
-          value = `"${value.replace(/"/g, '""')}"`;
+        const strValue = String(value);
+        if (strValue.includes(',') || strValue.includes('"') || strValue.includes('\n')) {
+          value = `"${strValue.replace(/"/g, '""')}"`;
         }
         
         return value;
@@ -49,10 +50,10 @@ export const exportToCSV = (data: any[], filename: string) => {
 };
 
 export const downloadAnalyticsExport = (
-  events: any[],
-  revenue: any[],
-  registrations: any[],
-  categories: any[]
+  events: Record<string, unknown>[],
+  revenue: Record<string, unknown>[],
+  registrations: Record<string, unknown>[],
+  categories: Record<string, unknown>[]
 ) => {
   const dateStr = new Date().toISOString().split('T')[0];
   

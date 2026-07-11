@@ -23,7 +23,7 @@ export function useUpdateOrganization(organizationId: string, currentRole: Role 
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: any) => updateOrganization(organizationId, data, currentRole),
+    mutationFn: (data: Record<string, unknown>) => updateOrganization(organizationId, data, currentRole),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations });
       queryClient.invalidateQueries({ queryKey: queryKeys.organization(organizationId) });
@@ -35,7 +35,7 @@ export function useUpdateOrganizationSettings(organizationId: string, currentRol
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: any) => updateOrganizationSettings(organizationId, data, currentRole),
+    mutationFn: (data: Record<string, unknown>) => updateOrganizationSettings(organizationId, data, currentRole),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizationSettings(organizationId) });
     },

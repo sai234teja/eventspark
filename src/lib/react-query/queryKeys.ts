@@ -16,7 +16,7 @@ export const queryKeys = {
   events: (orgId: string) => ['events', orgId] as const,
   
   // Audit Logs
-  auditLogs: (orgId: string, filters?: any) => ['auditLogs', orgId, filters] as const,
+  auditLogs: (orgId: string, filters?: unknown) => ['auditLogs', orgId, filters] as const,
 
   // Billing
   subscription: (orgId: string) => ['subscription', orgId] as const,

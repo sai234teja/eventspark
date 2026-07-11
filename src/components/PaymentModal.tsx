@@ -16,7 +16,10 @@ interface PaymentModalProps {
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: Record<string, unknown>) => { 
+      on: (event: string, callback: (response: { error: { description: string } }) => void) => void;
+      open: () => void;
+    };
   }
 }
 
@@ -93,7 +96,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
       name: "EventSpark",
       description: `Registration for ${eventTitle}`,
       image: "/favicon.ico",
-      handler: function (response: any) {
+      handler: function (response: { razorpay_payment_id: string }) {
         setIsProcessing(false);
         toast({
           title: "Payment Successful!",
@@ -132,7 +135,7 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
     try {
       const rzp = new window.Razorpay(options);
       
-      rzp.on('payment.failed', function (response: any) {
+      rzp.on('payment.failed', function (response: { error: { description: string } }) {
         console.error('Payment failed:', response.error);
         setIsProcessing(false);
         toast({

@@ -94,7 +94,6 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
       description: `Registration for ${eventTitle}`,
       image: "/favicon.ico",
       handler: function (response: any) {
-        console.log("Payment successful:", response);
         setIsProcessing(false);
         toast({
           title: "Payment Successful!",
@@ -124,7 +123,6 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
       modal: {
         ondismiss: function() {
           setIsProcessing(false);
-          console.log("Payment dismissed by user");
         },
         escape: true,
         backdropclose: false

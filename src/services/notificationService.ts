@@ -68,10 +68,8 @@ export const notificationService = {
     if (fetchError || !notification) throw fetchError || new Error('Notification not found');
 
     try {
-      // TODO: Integrate actual EmailProvider here in the future
-      console.log(`[Email Stub] Sending email to User ${notification.user_id}`);
-      console.log(`[Email Stub] Subject: ${notification.subject}`);
-      console.log(`[Email Stub] Body: ${notification.body}`);
+      // Note: Actual EmailProvider integration goes here in future phases
+      // Simulated sending for now
 
       // Simulate network request
       await new Promise(resolve => setTimeout(resolve, 500));

@@ -1,16 +1,16 @@
 {
-  "/create-event/page": "app/create-event/page.js",
   "/_not-found/page": "app/_not-found/page.js",
-  "/dashboard/page": "app/dashboard/page.js",
+  "/create-event/page": "app/create-event/page.js",
   "/events/[id]/page": "app/events/[id]/page.js",
-  "/login/page": "app/login/page.js",
   "/page": "app/page.js",
-  "/events/page": "app/events/page.js",
-  "/signup/page": "app/signup/page.js",
   "/onboarding/page": "app/onboarding/page.js",
-  "/admin/settings/page": "app/admin/settings/page.js",
+  "/signup/page": "app/signup/page.js",
+  "/events/page": "app/events/page.js",
+  "/login/page": "app/login/page.js",
+  "/dashboard/page": "app/dashboard/page.js",
   "/admin/page": "app/admin/page.js",
-  "/admin/audit/page": "app/admin/audit/page.js",
+  "/admin/settings/page": "app/admin/settings/page.js",
+  "/admin/billing/page": "app/admin/billing/page.js",
   "/admin/team/page": "app/admin/team/page.js",
-  "/admin/billing/page": "app/admin/billing/page.js"
+  "/admin/audit/page": "app/admin/audit/page.js"
 }

@@ -362,7 +362,44 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      tenant_analytics_summary: {
+        Row: {
+          organization_id: string
+          total_events: number
+          upcoming_events: number
+          completed_events: number
+          total_registrations: number
+          total_revenue: number
+        }
+      }
+      revenue_trend_analytics: {
+        Row: {
+          organization_id: string
+          date: string
+          revenue: number
+          payments_count: number
+        }
+      }
+      registration_trend_analytics: {
+        Row: {
+          organization_id: string
+          date: string
+          registration_count: number
+        }
+      }
+      event_analytics: {
+        Row: {
+          event_id: number
+          organization_id: string
+          title: string
+          category: string
+          date: string
+          maxCapacity: number
+          isCompleted: boolean
+          total_registrations: number
+          total_revenue: number
+        }
+      }
     }
     Functions: {
       [_ in never]: never

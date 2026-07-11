@@ -25,11 +25,11 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				primary: {
-					DEFAULT: 'hsl(var(--primary))',
+					DEFAULT: 'hsl(var(--brand-primary, var(--primary)))',
 					foreground: 'hsl(var(--primary-foreground))'
 				},
 				secondary: {
-					DEFAULT: 'hsl(var(--secondary))',
+					DEFAULT: 'hsl(var(--brand-secondary, var(--secondary)))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
 				destructive: {
@@ -41,7 +41,7 @@ export default {
 					foreground: 'hsl(var(--muted-foreground))'
 				},
 				accent: {
-					DEFAULT: 'hsl(var(--accent))',
+					DEFAULT: 'hsl(var(--brand-accent, var(--accent)))',
 					foreground: 'hsl(var(--accent-foreground))'
 				},
 				popover: {
@@ -64,9 +64,12 @@ export default {
 				}
 			},
 			borderRadius: {
-				lg: 'var(--radius)',
-				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				lg: 'var(--brand-radius, var(--radius))',
+				md: 'calc(var(--brand-radius, var(--radius)) - 2px)',
+				sm: 'calc(var(--brand-radius, var(--radius)) - 4px)'
+			},
+			fontFamily: {
+				sans: ['var(--brand-font, var(--font-sans))'],
 			},
 			keyframes: {
 				'accordion-down': {

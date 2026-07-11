@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { RoleGuard } from "@/components/RoleGuard";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Permission } from "@/types/rbac";
 
 interface Event {
@@ -250,10 +251,7 @@ const Dashboard = () => {
       {/* Navigation */}
       <nav className="px-6 py-4 border-b border-purple-800/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <Sparkles className="h-8 w-8 text-purple-300" />
-            <span className="text-2xl font-bold text-white">EventSpark</span>
-          </Link>
+          <BrandLogo />
           <div className="flex items-center space-x-4">
             <OrganizationSwitcher />
             <Link href="/events">

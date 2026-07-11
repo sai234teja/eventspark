@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Sparkles, Mail, Lock, User, Phone, Eye, EyeOff } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { signUpSchema } from "@/lib/validation";
@@ -108,10 +109,9 @@ const Signup = () => {
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-4">
-            <Sparkles className="h-8 w-8 text-purple-300" />
-            <span className="text-2xl font-bold text-white">EventSpark</span>
-          </Link>
+          <div className="flex justify-center mb-4">
+            <BrandLogo />
+          </div>
           <h1 className="text-3xl font-bold text-white">Join EventSpark</h1>
           <p className="text-purple-200 mt-2">Create your account to get started</p>
           {!isSupabaseConfigured && (

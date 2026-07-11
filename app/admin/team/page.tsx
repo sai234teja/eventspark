@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
-import { getMembers, removeMember, updateMemberRole, OrganizationMember } from "@/services/teamService";
+import { OrganizationMember } from "@/services/teamService";
 import { inviteUser } from "@/services/invitationService";
+import { useMembers, useUpdateMemberRole, useRemoveMember } from "@/lib/react-query/hooks/useMembers";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
@@ -16,32 +17,16 @@ import { Role } from "@/types/rbac";
 
 const TeamPage = () => {
   const { activeOrganization, currentRole } = useTenant();
-  const [members, setMembers] = useState<OrganizationMember[]>([]);
-  const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-
+  
   const [inviteEmail, setInviteEmail] = useState("");
   const [isInviting, setIsInviting] = useState(false);
 
   const [memberToRemove, setMemberToRemove] = useState<OrganizationMember | null>(null);
 
-  useEffect(() => {
-    if (activeOrganization && currentRole) {
-      loadMembers();
-    }
-  }, [activeOrganization, currentRole]);
-
-  const loadMembers = async () => {
-    try {
-      setLoading(true);
-      const data = await getMembers(activeOrganization!.id, currentRole!);
-      setMembers(data);
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to load team members", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: members = [], isLoading: loading } = useMembers(activeOrganization?.id, currentRole);
+  const updateRoleMutation = useUpdateMemberRole(activeOrganization?.id || "", currentRole || "");
+  const removeMemberMutation = useRemoveMember(activeOrganization?.id || "", currentRole || "");
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -61,28 +46,27 @@ const TeamPage = () => {
 
   const handleRoleChange = async (memberId: number, newRole: Role) => {
     if (!activeOrganization || !currentRole) return;
-    try {
-      // Optimistic update
-      setMembers(members.map(m => m.id === memberId ? { ...m, role: newRole } : m));
-      await updateMemberRole(memberId, newRole, activeOrganization.id, currentRole);
-      toast({ title: "Role Updated", description: "The member's role has been successfully updated." });
-    } catch (error: any) {
-      // Revert optimistic update
-      await loadMembers();
-      toast({ title: "Error", description: error.message || "Failed to update role", variant: "destructive" });
-    }
+    updateRoleMutation.mutate({ memberId, newRole }, {
+      onSuccess: () => {
+        toast({ title: "Role Updated", description: "The member's role has been successfully updated." });
+      },
+      onError: (error: any) => {
+        toast({ title: "Error", description: error.message || "Failed to update role", variant: "destructive" });
+      }
+    });
   };
 
   const handleRemoveMember = async () => {
     if (!memberToRemove || !activeOrganization || !currentRole) return;
-    try {
-      await removeMember(memberToRemove.id, activeOrganization.id, currentRole);
-      setMembers(members.filter(m => m.id !== memberToRemove.id));
-      toast({ title: "Member Removed", description: "The member has been removed from the organization." });
-      setMemberToRemove(null);
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to remove member", variant: "destructive" });
-    }
+    removeMemberMutation.mutate(memberToRemove.id, {
+      onSuccess: () => {
+        toast({ title: "Member Removed", description: "The member has been removed from the organization." });
+        setMemberToRemove(null);
+      },
+      onError: (error: any) => {
+        toast({ title: "Error", description: error.message || "Failed to remove member", variant: "destructive" });
+      }
+    });
   };
 
   const columns: ColumnDef<OrganizationMember>[] = [
@@ -200,8 +184,8 @@ const TeamPage = () => {
         onClose={() => setMemberToRemove(null)}
         onConfirm={handleRemoveMember}
         title="Remove Team Member"
-        description={`Are you sure you want to remove ${memberToRemove?.profiles[0]?.email} from this organization? They will lose all access.`}
-        confirmText="Yes, remove member"
+        description={`Are you sure you want to remove ${memberToRemove?.profiles?.[0]?.email || memberToRemove?.profiles?.email || 'this user'} from this organization? They will lose all access.`}
+        confirmText={removeMemberMutation.isPending ? "Removing..." : "Yes, remove member"}
       />
     </div>
   );

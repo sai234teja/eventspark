@@ -7,6 +7,7 @@ import { useRequirePermission } from "@/hooks/useRBAC";
 import { Permission } from "@/types/rbac";
 import { LayoutDashboard, Users, Settings, CreditCard, ScrollText, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 
 const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const { isAuthorized, isLoading } = useRequirePermission(Permission.MANAGE_TEAM);
@@ -31,9 +32,9 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="min-h-screen bg-black text-slate-300 font-sans flex flex-col md:flex-row">
       <aside className="w-full md:w-64 bg-slate-950 border-r border-slate-800 flex flex-col p-4">
-        <div className="flex items-center space-x-2 mb-8 px-2">
-          <Settings className="h-6 w-6 text-purple-400" />
-          <span className="text-xl font-bold text-white">Admin Portal</span>
+        <div className="mb-8 px-2">
+          <BrandLogo />
+          <div className="text-sm font-medium text-slate-400 mt-2 pl-2 tracking-wide uppercase">Admin Portal</div>
         </div>
         <nav className="space-y-2 flex-grow">
           {navItems.map((item) => {

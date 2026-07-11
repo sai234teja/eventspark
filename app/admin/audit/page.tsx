@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
-import { getAuditLogs, AuditLog, AuditLogFilters } from "@/services/auditService";
+import { AuditLog, AuditLogFilters } from "@/services/auditService";
+import { useAuditLogs } from "@/lib/react-query/hooks/useAuditLogs";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { DataTable, ColumnDef } from "@/components/ui/DataTable";
 import { useToast } from "@/hooks/use-toast";
@@ -12,10 +13,6 @@ import { Download } from "lucide-react";
 
 const AuditPage = () => {
   const { activeOrganization, currentRole } = useTenant();
-  const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(true);
-  // In a real app we'd fetch total counts and handle server-side pagination, 
-  // but we can fetch a chunk and paginate client-side or use a lightweight approach
   const [filters, setFilters] = useState<AuditLogFilters>({
     page: 1,
     limit: 100, // Fetch 100 items at a time
@@ -23,24 +20,14 @@ const AuditPage = () => {
   
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (activeOrganization && currentRole) {
-      loadLogs();
-    }
-  }, [activeOrganization, currentRole, filters]);
+  const { data: logsData, isLoading: loading, error } = useAuditLogs(activeOrganization?.id, currentRole, filters);
+  const logs = logsData?.logs || [];
 
-  const loadLogs = async () => {
-    try {
-      setLoading(true);
-      const data = await getAuditLogs(activeOrganization!.id, currentRole!, filters);
-      setLogs(data.logs);
-      // data.totalCount can be used if we switch DataTable to fully controlled server-side pagination
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to load audit logs", variant: "destructive" });
-    } finally {
-      setLoading(false);
+  useEffect(() => {
+    if (error) {
+      toast({ title: "Error", description: (error as any).message || "Failed to load audit logs", variant: "destructive" });
     }
-  };
+  }, [error, toast]);
 
   const handleExportCsv = () => {
     toast({ title: "Export Started", description: "Your CSV is being prepared." });

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
-import { getSubscription, getUsage, Subscription, Usage } from "@/services/billingService";
+import { useSubscription, useUsage } from "@/lib/react-query/hooks/useBilling";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,32 +13,17 @@ import { format } from "date-fns";
 const BillingPage = () => {
   const { activeOrganization, currentRole } = useTenant();
   const { toast } = useToast();
-  
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [usage, setUsage] = useState<Usage | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { data: subscription, isLoading: isSubLoading, error: subError } = useSubscription(activeOrganization?.id, currentRole);
+  const { data: usage, isLoading: isUsageLoading, error: usageError } = useUsage(activeOrganization?.id, currentRole);
+
+  const loading = isSubLoading || isUsageLoading;
+  const error = subError || usageError;
 
   useEffect(() => {
-    if (activeOrganization && currentRole) {
-      loadBillingData();
+    if (error) {
+      toast({ title: "Error", description: (error as any).message || "Failed to load billing details", variant: "destructive" });
     }
-  }, [activeOrganization, currentRole]);
-
-  const loadBillingData = async () => {
-    try {
-      setLoading(true);
-      const [subData, usageData] = await Promise.all([
-        getSubscription(activeOrganization!.id, currentRole!),
-        getUsage(activeOrganization!.id, currentRole!)
-      ]);
-      setSubscription(subData);
-      setUsage(usageData);
-    } catch (error: any) {
-      toast({ title: "Error", description: error.message || "Failed to load billing details", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [error, toast]);
 
   const handleManageBilling = () => {
     toast({ title: "Coming Soon", description: "Stripe integration is pending. Please contact support to change your plan." });

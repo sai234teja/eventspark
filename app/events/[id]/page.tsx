@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar, MapPin, Users, Clock, Sparkles, ArrowLeft, Share2, Edit, Save, X } from "lucide-react";
+import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useToast } from "@/hooks/use-toast";
 import PaymentModal from "@/components/PaymentModal";
 
@@ -226,10 +227,7 @@ const EventDetails = () => {
       {/* Navigation */}
       <nav className="px-6 py-4 border-b border-purple-800/50">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-2">
-            <Sparkles className="h-8 w-8 text-purple-300" />
-            <span className="text-2xl font-bold text-white">EventSpark</span>
-          </Link>
+          <BrandLogo />
           <div className="flex items-center space-x-4">
             <Link href="/events">
               <Button variant="ghost" className="text-white hover:bg-white/10">

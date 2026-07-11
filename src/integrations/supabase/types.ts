@@ -178,32 +178,50 @@ export type Database = {
         Row: {
           organization_id: string
           logo_url: string | null
+          favicon_url: string | null
           primary_color: string | null
           secondary_color: string | null
+          accent_color: string | null
           website: string | null
           timezone: string | null
+          font_family: string | null
+          border_radius: string | null
+          theme_preference: string | null
           feature_flags: Json | null
           updated_at: string
+          updated_by: string | null
         }
         Insert: {
           organization_id: string
           logo_url?: string | null
+          favicon_url?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          accent_color?: string | null
           website?: string | null
           timezone?: string | null
+          font_family?: string | null
+          border_radius?: string | null
+          theme_preference?: string | null
           feature_flags?: Json | null
           updated_at?: string
+          updated_by?: string | null
         }
         Update: {
           organization_id?: string
           logo_url?: string | null
+          favicon_url?: string | null
           primary_color?: string | null
           secondary_color?: string | null
+          accent_color?: string | null
           website?: string | null
           timezone?: string | null
+          font_family?: string | null
+          border_radius?: string | null
+          theme_preference?: string | null
           feature_flags?: Json | null
           updated_at?: string
+          updated_by?: string | null
         }
       }
       organizations: {

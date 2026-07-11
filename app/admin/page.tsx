@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useTenant } from "@/contexts/TenantContext";
-import { getDashboardSummary, DashboardSummary } from "@/services/adminService";
-import { getAuditLogs, AuditLog } from "@/services/auditService";
+import { useDashboardSummary } from "@/lib/react-query/hooks/useDashboard";
+import { useAuditLogs } from "@/lib/react-query/hooks/useAuditLogs";
 import { StatCard } from "@/components/ui/StatCard";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { Users, Calendar, Mail, CreditCard, Loader2 } from "lucide-react";
@@ -11,36 +11,26 @@ import { format } from "date-fns";
 
 const AdminDashboard = () => {
   const { activeOrganization, currentRole } = useTenant();
-  const [summary, setSummary] = useState<DashboardSummary | null>(null);
-  const [recentLogs, setRecentLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(true);
+  
+  const { data: summary, isLoading: isLoadingSummary, error: summaryError } = useDashboardSummary(activeOrganization?.id, currentRole);
+  const { data: logsData, isLoading: isLoadingLogs } = useAuditLogs(activeOrganization?.id, currentRole, { page: 1, limit: 5 });
 
-  useEffect(() => {
-    if (activeOrganization && currentRole) {
-      loadDashboard();
-    }
-  }, [activeOrganization, currentRole]);
+  const isLoading = isLoadingSummary || isLoadingLogs;
+  const error = summaryError;
 
-  const loadDashboard = async () => {
-    try {
-      setLoading(true);
-      const [summaryData, logsData] = await Promise.all([
-        getDashboardSummary(activeOrganization!.id, currentRole!),
-        getAuditLogs(activeOrganization!.id, currentRole!, { page: 1, limit: 5 })
-      ]);
-      setSummary(summaryData);
-      setRecentLogs(logsData.logs);
-    } catch (error) {
-      console.error("Failed to load dashboard:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading || !summary) {
+  if (isLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+      </div>
+    );
+  }
+
+  if (error || !summary) {
+    return (
+      <div className="bg-red-500/10 border border-red-500 rounded-lg p-6 text-center">
+        <h3 className="text-lg font-medium text-red-500 mb-2">Error Loading Dashboard</h3>
+        <p className="text-slate-400">{(error as any)?.message || "Failed to load dashboard summary"}</p>
       </div>
     );
   }
@@ -78,11 +68,11 @@ const AdminDashboard = () => {
       <div className="mt-8">
         <h3 className="text-lg font-medium text-white mb-4">Recent Activity</h3>
         <div className="bg-slate-900 border border-slate-800 rounded-lg overflow-hidden">
-          {recentLogs.length === 0 ? (
+          {!logsData?.logs || logsData.logs.length === 0 ? (
             <div className="p-6 text-center text-slate-500">No recent activity found.</div>
           ) : (
             <div className="divide-y divide-slate-800">
-              {recentLogs.map((log) => (
+              {logsData.logs.map((log) => (
                 <div key={log.id} className="p-4 flex items-center justify-between hover:bg-slate-800/50 transition-colors">
                   <div>
                     <p className="text-sm font-medium text-slate-300">

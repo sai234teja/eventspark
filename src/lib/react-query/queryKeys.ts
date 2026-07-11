@@ -31,4 +31,11 @@ export const queryKeys = {
   analyticsTopRevenueEvents: (orgId: string, limit: number) => ['analytics', 'topRevenueEvents', orgId, limit] as const,
   analyticsRecentEvents: (orgId: string, limit: number) => ['analytics', 'recentEvents', orgId, limit] as const,
   analyticsCategories: (orgId: string) => ['analytics', 'categories', orgId] as const,
+
+  // Tickets
+  tickets: (orgId: string) => ['tickets', orgId] as const,
+  eventTickets: (orgId: string, eventId: number) => ['tickets', 'event', orgId, eventId] as const,
+  
+  // Notifications
+  notifications: (orgId: string) => ['notifications', orgId] as const,
 };

@@ -143,6 +143,16 @@ export const registerForEvent = async (eventId: number, registrationData: any, o
     console.error('Error registering for event:', error);
     throw new Error('Failed to register for event');
   }
+  
+  try {
+    // Phase 7.5: Auto-issue ticket via Server Action orchestrated by ticketService
+    // This executes issue_ticket() RPC transactionally on the server
+    const { ticketService } = await import('@/services/ticketService');
+    await ticketService.issueTicket(organizationId, eventId, data.id);
+  } catch (ticketError) {
+    console.error('Failed to issue ticket after registration:', ticketError);
+    // Note: Registration succeeded, but ticketing failed. We log the error but return the registration data.
+  }
 
   return data;
 };

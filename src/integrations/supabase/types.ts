@@ -360,6 +360,146 @@ export type Database = {
           created_at?: string
         }
       }
+      tickets: {
+        Row: {
+          id: string
+          organization_id: string
+          event_id: number
+          registration_id: string
+          qr_token: string
+          ticket_number: string
+          status: string
+          issued_at: string
+          checked_in_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          event_id: number
+          registration_id: string
+          qr_token: string
+          ticket_number: string
+          status?: string
+          issued_at?: string
+          checked_in_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          event_id?: number
+          registration_id?: string
+          qr_token?: string
+          ticket_number?: string
+          status?: string
+          issued_at?: string
+          checked_in_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      ticket_checkins: {
+        Row: {
+          id: string
+          organization_id: string
+          ticket_id: string
+          checked_in_by: string
+          checked_in_time: string
+          device: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          ticket_id: string
+          checked_in_by: string
+          checked_in_time?: string
+          device?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          ticket_id?: string
+          checked_in_by?: string
+          checked_in_time?: string
+          device?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notification_templates: {
+        Row: {
+          id: string
+          organization_id: string
+          name: string
+          subject: string | null
+          body: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          name: string
+          subject?: string | null
+          body: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          name?: string
+          subject?: string | null
+          body?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          organization_id: string
+          user_id: string
+          event_id: number | null
+          template: string
+          subject: string | null
+          body: string
+          delivery_status: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          organization_id: string
+          user_id: string
+          event_id?: number | null
+          template: string
+          subject?: string | null
+          body: string
+          delivery_status?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          organization_id?: string
+          user_id?: string
+          event_id?: number | null
+          template?: string
+          subject?: string | null
+          body?: string
+          delivery_status?: string
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       tenant_analytics_summary: {

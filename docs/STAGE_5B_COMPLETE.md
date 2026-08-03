@@ -28,3 +28,12 @@ graph TD
 - Tested ticket order creation against live Razorpay Test API.
 - Implemented and verified the live camera QR code scanner page and API check-in handlers.
 - Compiled the codebase locally using `npm run build` with **zero errors**.
+
+## 3. Security: QR Signature Verification
+
+To prevent ticket forgery and bypass of payment verification:
+- **HMAC-SHA256 Signatures**: When a QR code is generated (both in free order path and payment verification path), a secure cryptographic signature (`sig`) is computed over `registrationId|eventId|userId` using the `QR_SIGNING_SECRET` key.
+- **Timing-Safe Verification**: The `/api/scan` endpoint verifies the payload signature using `crypto.timingSafeEqual` BEFORE performing any database lookups.
+- **Access Control**: Unsigned or tampered QR codes are immediately rejected with a generic `400` error to prevent leaking the existence of registration IDs in the database. Raw UUID manual inputs are permitted *only* for authenticated organizers/admins with active sessions.
+- **Vercel Deployments**: The `QR_SIGNING_SECRET` environment variable must be added to the project settings in the Vercel dashboard prior to deployment.
+

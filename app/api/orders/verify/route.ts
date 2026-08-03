@@ -76,9 +76,10 @@ export async function POST(request: Request) {
     }
 
     // 5. Generate QR code
+    const { signQrPayload } = await import('@/lib/qrSignature');
     const QRCode = (await import('qrcode')).default;
     const regId = crypto.randomUUID();
-    const qrData = JSON.stringify({ registrationId: regId, eventId, userId });
+    const qrData = signQrPayload(regId, eventId, userId);
     const qrCode = await QRCode.toDataURL(qrData);
 
     // 6. Insert registration

@@ -82,9 +82,10 @@ export async function POST(request: Request) {
         .eq('id', ticketTypeId);
 
       // Generate registration
+      const { signQrPayload } = await import('@/lib/qrSignature');
       const QRCode = (await import('qrcode')).default;
       const regId = crypto.randomUUID();
-      const qrData = JSON.stringify({ registrationId: regId, eventId, userId });
+      const qrData = signQrPayload(regId, eventId, userId);
       const qrCode = await QRCode.toDataURL(qrData);
 
       const { error: regErr } = await supabase.from('registrations').insert({

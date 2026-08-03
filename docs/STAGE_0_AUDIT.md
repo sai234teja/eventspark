@@ -53,3 +53,9 @@ dist-ssr
 ## 5. Recommendations
 - Keep `.env.example` clean of secrets (already implemented).
 - Ensure `.env.local` remains untracked and in `.gitignore` (already covered by `*.local` wildcard).
+
+## 6. Branch Consolidation
+- **Canonical Branch Status**: The `main` branch has been successfully updated to represent the latest, complete, and working Next.js App Router code (matching the state of `phase-7-analytics` at commit `b13b48d`).
+- **Legacy Backup**: The original Vite-based React codebase has been preserved in a backup branch named `legacy-vite-main` both locally and on origin (`origin/legacy-vite-main`).
+- **Default Branch**: `main` is now the single source of truth branch for all future EventSpark development.
+

@@ -25,7 +25,7 @@ export const useTenant = () => {
 };
 
 export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading: authLoading } = useAuth();
+  const { user, role, loading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   
@@ -47,8 +47,13 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
       if (orgs.length === 0) {
         setActiveOrganization(null);
-        if (pathname !== '/onboarding' && pathname !== '/login' && pathname !== '/signup') {
-          router.push('/onboarding');
+        if (pathname === '/onboarding' || pathname === '/dashboard' || pathname === '/organizer' || pathname === '/admin') {
+          // If we hit onboarding, enforce the correct role dashboard
+          if (pathname === '/onboarding') {
+            if (role === 'admin') router.push('/admin');
+            else if (role === 'organizer') router.push('/organizer');
+            else router.push('/dashboard');
+          }
         }
       } else {
         // Try to load from localStorage first
@@ -64,7 +69,9 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         setActiveOrganization(selectedOrg);
         
         if (pathname === '/onboarding') {
-          router.push('/dashboard');
+          if (role === 'admin') router.push('/admin');
+          else if (role === 'organizer') router.push('/organizer');
+          else router.push('/dashboard');
         }
       }
     } catch (error) {

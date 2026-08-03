@@ -1,13 +1,13 @@
 -- Phase 7.5: Notifications, Ticketing & QR Check-In System
 
 -- Enable UUID extension if not enabled
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- 1. Create tickets table
 CREATE TABLE IF NOT EXISTS public.tickets (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
-    event_id INTEGER NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
+    event_id UUID NOT NULL REFERENCES public.events(id) ON DELETE CASCADE,
     registration_id UUID NOT NULL REFERENCES public.registrations(id) ON DELETE CASCADE,
     qr_token TEXT NOT NULL UNIQUE,
     ticket_number TEXT NOT NULL UNIQUE,
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.tickets (
 
 -- 2. Create ticket_checkins table
 CREATE TABLE IF NOT EXISTS public.ticket_checkins (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
     ticket_id UUID NOT NULL REFERENCES public.tickets(id) ON DELETE CASCADE,
     checked_in_by UUID NOT NULL REFERENCES auth.users(id),
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS public.ticket_checkins (
 
 -- 3. Create notification_templates table
 CREATE TABLE IF NOT EXISTS public.notification_templates (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
     name TEXT NOT NULL,
     subject TEXT,
@@ -44,10 +44,10 @@ CREATE TABLE IF NOT EXISTS public.notification_templates (
 
 -- 4. Create notifications table
 CREATE TABLE IF NOT EXISTS public.notifications (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     organization_id UUID NOT NULL REFERENCES public.organizations(id) ON DELETE CASCADE,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    event_id INTEGER REFERENCES public.events(id) ON DELETE SET NULL,
+    event_id UUID REFERENCES public.events(id) ON DELETE SET NULL,
     template TEXT NOT NULL,
     subject TEXT,
     body TEXT NOT NULL,

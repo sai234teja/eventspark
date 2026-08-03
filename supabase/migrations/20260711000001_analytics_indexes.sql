@@ -1,8 +1,8 @@
 -- Phase 7.1.5: Analytics Performance Indexes
 
 -- Index for tenant_analytics_summary upcoming/completed filters
-CREATE INDEX IF NOT EXISTS idx_events_org_completed 
-ON events(organization_id, "isCompleted");
+CREATE INDEX IF NOT EXISTS idx_events_org_status 
+ON events(organization_id, status);
 
 -- Index for registration_trend_analytics
 CREATE INDEX IF NOT EXISTS idx_registrations_org_date 
@@ -18,4 +18,4 @@ ON registrations(event_id);
 
 -- Additional index for event analytics date filtering
 CREATE INDEX IF NOT EXISTS idx_events_org_date 
-ON events(organization_id, date);
+ON events(organization_id, start_date);

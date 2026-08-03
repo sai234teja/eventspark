@@ -5,8 +5,8 @@ CREATE OR REPLACE VIEW tenant_analytics_summary WITH (security_invoker = true) A
 SELECT
     o.id AS organization_id,
     COUNT(DISTINCT e.id) AS total_events,
-    COUNT(DISTINCT e.id) FILTER (WHERE e."isCompleted" = false) AS upcoming_events,
-    COUNT(DISTINCT e.id) FILTER (WHERE e."isCompleted" = true) AS completed_events,
+    COUNT(DISTINCT e.id) FILTER (WHERE e.status != 'completed') AS upcoming_events,
+    COUNT(DISTINCT e.id) FILTER (WHERE e.status = 'completed') AS completed_events,
     (SELECT COUNT(*) FROM registrations r WHERE r.organization_id = o.id) AS total_registrations,
     (SELECT COALESCE(SUM(amount), 0) FROM payments p WHERE p.organization_id = o.id AND p.status = 'succeeded') AS total_revenue
 FROM organizations o
@@ -39,13 +39,12 @@ SELECT
     e.id AS event_id,
     e.organization_id,
     e.title,
-    e.category,
-    e.date,
-    e."maxCapacity",
-    e."isCompleted",
+    e.category_id,
+    e.start_date,
+    e.status,
     COUNT(DISTINCT r.id) AS total_registrations,
     COALESCE(SUM(p.amount), 0) AS total_revenue
 FROM events e
-LEFT JOIN registrations r ON e.id::text = r.event_id
+LEFT JOIN registrations r ON e.id = r.event_id
 LEFT JOIN payments p ON r.id = p.registration_id AND p.status = 'succeeded'
-GROUP BY e.id, e.organization_id, e.title, e.category, e.date, e."maxCapacity", e."isCompleted";
+GROUP BY e.id, e.organization_id, e.title, e.category_id, e.start_date, e.status;

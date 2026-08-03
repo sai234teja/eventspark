@@ -2,14 +2,25 @@
 -- Description: Create organizations, junction tables, subscriptions, audit_logs and expand existing tables.
 
 -- Enable UUID extension if not enabled
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
+---------------------------------------------------------
+-- 0. Create Profiles Table (Base for all users)
+---------------------------------------------------------
+CREATE TABLE IF NOT EXISTS public.profiles (
+  id uuid REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
+  full_name text,
+  avatar_url text,
+  email text UNIQUE NOT NULL,
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
+  updated_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
+);
 ---------------------------------------------------------
 -- 1. Create Core Tables
 ---------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS public.organizations (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text NOT NULL,
   slug text UNIQUE NOT NULL,
   created_by uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
@@ -30,7 +41,7 @@ CREATE TABLE IF NOT EXISTS public.organization_settings (
 );
 
 CREATE TABLE IF NOT EXISTS public.organization_members (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   role text NOT NULL CHECK (role IN ('owner', 'admin', 'manager', 'staff', 'student')),
@@ -39,7 +50,7 @@ CREATE TABLE IF NOT EXISTS public.organization_members (
 );
 
 CREATE TABLE IF NOT EXISTS public.organization_invites (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   email text NOT NULL,
   role text NOT NULL CHECK (role IN ('owner', 'admin', 'manager', 'staff', 'student')),
@@ -50,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.organization_invites (
 );
 
 CREATE TABLE IF NOT EXISTS public.subscriptions (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid UNIQUE REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   stripe_customer_id text,
   stripe_subscription_id text,
@@ -61,7 +72,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
 );
 
 CREATE TABLE IF NOT EXISTS public.audit_logs (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   user_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
   action text NOT NULL,
@@ -172,6 +183,6 @@ CREATE INDEX IF NOT EXISTS idx_payments_org_id ON public.payments(organization_i
 
 -- Composite Indexes
 CREATE INDEX IF NOT EXISTS idx_events_org_created_at ON public.events(organization_id, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_events_org_organizer ON public.events(organization_id, organizer_id);
+CREATE INDEX IF NOT EXISTS idx_events_org_organizer ON public.events(organization_id, created_by);
 CREATE INDEX IF NOT EXISTS idx_payments_org_status ON public.payments(organization_id, status);
 CREATE INDEX IF NOT EXISTS idx_registrations_org_user ON public.registrations(organization_id, user_id);

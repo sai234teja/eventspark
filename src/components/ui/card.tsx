@@ -3,14 +3,21 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+import { motion } from "framer-motion";
+
 const Card = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
+  React.ComponentPropsWithoutRef<typeof motion.div>
 >(({ className, ...props }, ref) => (
-  <div
+  <motion.div
     ref={ref}
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.3 }}
     className={cn(
-      "rounded-lg border bg-card text-card-foreground shadow-sm",
+      "rounded-xl border border-white/10 bg-white/5 backdrop-blur-md shadow-lg",
+      "hover:shadow-xl hover:border-white/20 transition-all duration-300",
+      "dark:bg-black/20 dark:border-white/10 dark:hover:border-white/20",
       className
     )}
     {...props}

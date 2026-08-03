@@ -5,7 +5,7 @@
 -- 1. Coupons & Discounts
 ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.coupons (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   code text NOT NULL,
   discount_type text NOT NULL CHECK (discount_type IN ('percentage', 'fixed')),
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS public.coupons (
   current_uses integer DEFAULT 0,
   valid_from timestamp with time zone DEFAULT now(),
   valid_until timestamp with time zone,
-  event_id bigint REFERENCES public.events(id) ON DELETE CASCADE,
+  event_id uuid REFERENCES public.events(id) ON DELETE CASCADE,
   is_active boolean DEFAULT true,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(organization_id, code)
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS public.coupons (
 -- 2. Refunds
 ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.refunds (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   payment_id uuid REFERENCES public.payments(id) ON DELETE CASCADE NOT NULL,
   razorpay_refund_id text UNIQUE,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS public.refunds (
 -- 3. Wallets
 ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.wallets (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE UNIQUE NOT NULL,
   balance numeric DEFAULT 0.00 NOT NULL,
   currency text DEFAULT 'INR',
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS public.wallets (
 );
 
 CREATE TABLE IF NOT EXISTS public.wallet_transactions (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   wallet_id uuid REFERENCES public.wallets(id) ON DELETE CASCADE NOT NULL,
   amount numeric NOT NULL,
   transaction_type text NOT NULL CHECK (transaction_type IN ('credit', 'debit')),
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.wallet_transactions (
 -- 4. Affiliates & Referrals
 ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.affiliates (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   organization_id uuid REFERENCES public.organizations(id) ON DELETE CASCADE NOT NULL,
   user_id uuid REFERENCES public.profiles(id) ON DELETE CASCADE NOT NULL,
   referral_code text UNIQUE NOT NULL,
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS public.affiliates (
 );
 
 CREATE TABLE IF NOT EXISTS public.affiliate_conversions (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   affiliate_id uuid REFERENCES public.affiliates(id) ON DELETE CASCADE NOT NULL,
   registration_id uuid REFERENCES public.registrations(id) ON DELETE CASCADE NOT NULL,
   commission_amount numeric NOT NULL,
@@ -84,8 +84,8 @@ CREATE TABLE IF NOT EXISTS public.affiliate_conversions (
 -- 5. Multi-Tier Ticketing
 ---------------------------------------------------------
 CREATE TABLE IF NOT EXISTS public.ticket_tiers (
-  id uuid DEFAULT uuid_generate_v4() PRIMARY KEY,
-  event_id bigint REFERENCES public.events(id) ON DELETE CASCADE NOT NULL,
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  event_id uuid REFERENCES public.events(id) ON DELETE CASCADE NOT NULL,
   name text NOT NULL, -- e.g., 'VIP', 'Early Bird', 'General Admission'
   price numeric NOT NULL,
   capacity integer,

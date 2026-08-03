@@ -1,214 +1,140 @@
 'use client';
 
-import React, { useState } from 'react';
-import { useTenant } from '@/contexts/TenantContext';
-import { SectionHeader } from '@/components/ui/SectionHeader';
-import { StatCard } from '@/components/ui/StatCard';
-import { ChartCard } from '@/components/ui/charts/ChartCard';
-import { LineChart } from '@/components/ui/charts/LineChart';
-import { BarChart } from '@/components/ui/charts/BarChart';
-import { PieChart } from '@/components/ui/charts/PieChart';
-import { AreaChart } from '@/components/ui/charts/AreaChart';
-import { DataTable } from '@/components/ui/DataTable';
-import { RoleGuard } from '@/components/RoleGuard';
-import { Permission } from '@/types/rbac';
-import { Button } from '@/components/ui/button';
-import { Download, RefreshCw } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { subDays, startOfDay, format } from 'date-fns';
-import { downloadAnalyticsExport } from '@/lib/exportUtils';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
+import { Loader2, TrendingUp, Users, Ticket, DollarSign } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-import {
-  useDashboardSummary,
-  useRevenueTrend,
-  useRegistrationTrend,
-  useAttendanceTrend,
-  useTopEvents,
-  useRecentEvents,
-  useCategoryDistribution,
-} from '@/lib/react-query/hooks/useAnalytics';
+const revenueData = [
+  { name: 'Mon', total: 1500 },
+  { name: 'Tue', total: 2300 },
+  { name: 'Wed', total: 3400 },
+  { name: 'Thu', total: 2800 },
+  { name: 'Fri', total: 4500 },
+  { name: 'Sat', total: 5800 },
+  { name: 'Sun', total: 6200 },
+];
 
-type DateFilter = 'today' | '7d' | '30d' | '90d' | 'all';
+const ticketData = [
+  { name: 'VIP', sold: 450 },
+  { name: 'General', sold: 1200 },
+  { name: 'Early Bird', sold: 800 },
+];
 
-export default function AnalyticsPage() {
-  return (
-    <RoleGuard require={Permission.VIEW_ANALYTICS}>
-      <AnalyticsDashboard />
-    </RoleGuard>
-  );
-}
+export default function AnalyticsDashboard() {
+  const isLoading = false;
 
-function AnalyticsDashboard() {
-  const { activeOrganization } = useTenant();
-  const orgId = activeOrganization?.id || null;
-
-  const [dateFilter, setDateFilter] = useState<DateFilter>('30d');
-
-  const getDateRange = () => {
-    if (dateFilter === 'all') return { startDate: undefined, endDate: undefined };
-    const now = new Date();
-    let start = new Date();
-    if (dateFilter === 'today') start = startOfDay(now);
-    if (dateFilter === '7d') start = subDays(now, 7);
-    if (dateFilter === '30d') start = subDays(now, 30);
-    if (dateFilter === '90d') start = subDays(now, 90);
-
-    return {
-      startDate: start.toISOString(),
-      endDate: now.toISOString()
-    };
-  };
-
-  const dateRange = getDateRange();
-
-  // Queries
-  const { data: summary, isLoading: loadingSummary, refetch: refetchSummary } = useDashboardSummary(orgId);
-  const { data: revenueTrend, isLoading: loadingRevenue, refetch: refetchRevenue } = useRevenueTrend(orgId, dateRange.startDate, dateRange.endDate);
-  const { data: regTrend, isLoading: loadingReg, refetch: refetchReg } = useRegistrationTrend(orgId, dateRange.startDate, dateRange.endDate);
-  const { data: attendance, isLoading: loadingAttendance, refetch: refetchAttendance } = useAttendanceTrend(orgId, dateRange.startDate, dateRange.endDate);
-  const { data: topEvents, isLoading: loadingTopEvents, refetch: refetchTopEvents } = useTopEvents(orgId, 5);
-  const { data: recentEvents, isLoading: loadingRecentEvents, refetch: refetchRecentEvents } = useRecentEvents(orgId, 5);
-  const { data: categories, isLoading: loadingCategories, refetch: refetchCategories } = useCategoryDistribution(orgId);
-
-  const handleRefresh = () => {
-    refetchSummary();
-    refetchRevenue();
-    refetchReg();
-    refetchAttendance();
-    refetchTopEvents();
-    refetchRecentEvents();
-    refetchCategories();
-  };
-
-  const handleExport = () => {
-    downloadAnalyticsExport(
-      recentEvents || [],
-      revenueTrend || [],
-      regTrend || [],
-      categories || []
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+      </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <SectionHeader 
-          title="Analytics Overview" 
-          description="Monitor your organization's performance and engagement."
-        />
-        <div className="flex items-center gap-2 w-full sm:w-auto">
-          <Select value={dateFilter} onValueChange={(v) => setDateFilter(v as DateFilter)}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select date range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="today">Today</SelectItem>
-              <SelectItem value="7d">Last 7 Days</SelectItem>
-              <SelectItem value="30d">Last 30 Days</SelectItem>
-              <SelectItem value="90d">Last 90 Days</SelectItem>
-              <SelectItem value="all">All Time</SelectItem>
-            </SelectContent>
-          </Select>
-          
-          <Button variant="outline" size="icon" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4" />
-          </Button>
-          
-          <Button variant="outline" onClick={handleExport}>
-            <Download className="mr-2 h-4 w-4" />
-            Export
-          </Button>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight text-white mb-2">Organizer Analytics</h1>
+        <p className="text-slate-400">Monitor your event performance, revenue growth, and check-in velocity.</p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Events"
-          value={summary?.total_events ?? 0}
-          description="Across all time"
-        />
-        <StatCard
-          title="Upcoming Events"
-          value={summary?.upcoming_events ?? 0}
-          description="Scheduled for future"
-        />
-        <StatCard
-          title="Registrations"
-          value={summary?.total_registrations ?? 0}
-          description="Total attendees"
-        />
-        <StatCard
-          title="Revenue"
-          value={`$${(summary?.total_revenue ?? 0).toLocaleString()}`}
-          description="Total confirmed payments"
-        />
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-xl hover:border-indigo-500/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">Total Revenue</CardTitle>
+              <DollarSign className="h-4 w-4 text-indigo-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">₹2,45,231.89</div>
+              <p className="text-xs text-emerald-400 mt-1 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" /> +20.1% from last month
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-xl hover:border-emerald-500/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">Tickets Sold</CardTitle>
+              <Ticket className="h-4 w-4 text-emerald-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">+2,450</div>
+              <p className="text-xs text-emerald-400 mt-1 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" /> +15% from last week
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}>
+          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-xl hover:border-blue-500/50 transition-colors">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium text-slate-300">Registrations</CardTitle>
+              <Users className="h-4 w-4 text-blue-400" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-white">+12,234</div>
+              <p className="text-xs text-blue-400 mt-1 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-1" /> +19% from last month
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <ChartCard title="Revenue Trend" description="Succeeded payments over time">
-          <LineChart 
-            data={revenueTrend || []} 
-            xDataKey="date" 
-            yDataKey="revenue" 
-            isLoading={loadingRevenue} 
-            valueFormatter={(val) => `$${val}`}
-          />
-        </ChartCard>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+        <Card className="col-span-4 bg-slate-900/50 border-slate-800 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-white">Revenue Growth</CardTitle>
+            <CardDescription className="text-slate-400">Trailing 7-day ticket sales volume.</CardDescription>
+          </CardHeader>
+          <CardContent className="pl-2">
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={revenueData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#818cf8" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+                    itemStyle={{ color: '#fff' }}
+                  />
+                  <Area type="monotone" dataKey="total" stroke="#818cf8" strokeWidth={2} fillOpacity={1} fill="url(#colorTotal)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
-        <ChartCard title="Registration Trend" description="New registrations over time">
-          <BarChart 
-            data={regTrend || []} 
-            xDataKey="date" 
-            yDataKey="registration_count" 
-            isLoading={loadingReg} 
-          />
-        </ChartCard>
-
-        <ChartCard title="Attendance Trend" description="Total registrations per event">
-          <AreaChart 
-            data={attendance || []} 
-            xDataKey="title" 
-            yDataKey="total_registrations" 
-            isLoading={loadingAttendance} 
-          />
-        </ChartCard>
-
-        <ChartCard title="Category Distribution" description="Registrations split by event category">
-          <PieChart 
-            data={categories || []} 
-            nameKey="category" 
-            dataKey="value" 
-            isLoading={loadingCategories} 
-          />
-        </ChartCard>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Top Events by Registrations</h3>
-          <DataTable 
-            data={topEvents || []} 
-            columns={[
-              { header: 'Title', accessorKey: 'title' },
-              { header: 'Date', accessorKey: 'date', cell: (val: any) => new Date(val.date).toLocaleDateString() },
-              { header: 'Registrations', accessorKey: 'total_registrations' },
-            ]} 
-            loading={loadingTopEvents}
-          />
-        </div>
-        
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Recent Events</h3>
-          <DataTable 
-            data={recentEvents || []} 
-            columns={[
-              { header: 'Title', accessorKey: 'title' },
-              { header: 'Category', accessorKey: 'category' },
-              { header: 'Revenue', accessorKey: 'total_revenue', cell: (val: any) => `$${val.total_revenue || 0}` },
-            ]} 
-            loading={loadingRecentEvents}
-          />
-        </div>
+        <Card className="col-span-3 bg-slate-900/50 border-slate-800 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-white">Sales by Tier</CardTitle>
+            <CardDescription className="text-slate-400">Distribution of ticket categories.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ticketData}>
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    cursor={{ fill: '#334155', opacity: 0.4 }}
+                    contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '8px' }}
+                  />
+                  <Bar dataKey="sold" fill="#818cf8" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

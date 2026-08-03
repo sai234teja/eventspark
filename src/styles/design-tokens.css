@@ -1,0 +1,57 @@
+/* EventSpark Design System Tokens */
+:root {
+  /* Colors - Light Theme */
+  --brand-primary: 252 100% 64%;      /* HSL for #6C47FF */
+  --brand-accent: 0 100% 71%;         /* HSL for #FF6B6B */
+  --brand-secondary: 252 20% 90%;
+  
+  --background: 0 0% 98%;             /* #FAFAFA */
+  --foreground: 240 10% 4%;           /* Near Black */
+  
+  --card: 0 0% 100%;                  /* #FFFFFF */
+  --card-foreground: 240 10% 4%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 4%;
+  
+  --border: 240 6% 90%;
+  --input: 240 6% 90%;
+  --ring: 252 100% 64%;
+  
+  --muted: 240 5% 96%;
+  --muted-foreground: 240 4% 46%;
+
+  /* Border Radii */
+  --brand-radius: 12px;
+  --radius: 12px;
+  --radius-button: 8px;
+  --radius-pill: 24px;
+
+  /* Shadows */
+  --brand-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
+.dark {
+  /* Colors - Dark Theme */
+  --brand-primary: 252 100% 64%;      /* HSL for #6C47FF */
+  --brand-accent: 0 100% 71%;         /* HSL for #FF6B6B */
+  --brand-secondary: 240 6% 15%;
+  
+  --background: 240 20% 5%;           /* #0A0A0F */
+  --foreground: 240 10% 98%;          /* Near White */
+  
+  --card: 240 17% 8%;                 /* #111118 */
+  --card-foreground: 240 10% 98%;
+  
+  --popover: 240 17% 8%;
+  --popover-foreground: 240 10% 98%;
+  
+  --border: 240 6% 16%;
+  --input: 240 6% 16%;
+  --ring: 252 100% 64%;
+  
+  --muted: 240 6% 14%;
+  --muted-foreground: 240 5% 65%;
+
+  --brand-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}

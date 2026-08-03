@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRequirePermission } from "@/hooks/useRBAC";
 import { Permission } from "@/types/rbac";
-import { LayoutDashboard, Users, Settings, CreditCard, ScrollText, ArrowLeft, BarChart3, Ticket, ScanLine, Bell } from "lucide-react";
+import { LayoutDashboard, Users, Settings, CreditCard, ScrollText, ArrowLeft, BarChart3, Ticket, ScanLine, Bell, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 
@@ -24,6 +24,7 @@ const AdminLayout = ({ children }: { children: React.ReactNode }) => {
   const navItems = [
     { name: "Overview", href: "/admin", icon: LayoutDashboard },
     { name: "Analytics", href: "/admin/analytics", icon: BarChart3 },
+    { name: "Commerce", href: "/admin/commerce", icon: Store },
     { name: "Tickets", href: "/admin/tickets", icon: Ticket },
     { name: "Check-In", href: "/admin/checkin", icon: ScanLine },
     { name: "Team", href: "/admin/team", icon: Users },

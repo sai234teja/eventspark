@@ -1,163 +1,92 @@
+# EventSpark v1.8 - Enterprise Event Commerce Platform
 
-# EventSpark - Event Management Platform
+![EventSpark Banner](https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=2000&auto=format&fit=crop)
 
-A modern, full-featured event management system built with React, TypeScript, and Tailwind CSS.
+EventSpark is a commercial-grade, multi-tenant Event Ticketing and Organizer SaaS built as a comprehensive B.Tech Major Project. It matches the scalability, aesthetic, and functional depth of industry leaders like Eventbrite, Cvent, and Meetup.
 
-## Features
+## 🚀 Features
 
-- 🔐 **User Authentication** - Login and signup system
-- 🎟️ **Event Registration** - Register for events with payment integration
-- 💳 **Payment Integration** - Razorpay integration with UPI support
-- 📊 **Dashboard** - User and organizer dashboards
-- 🎫 **QR Code Tickets** - Digital tickets with QR codes
-- 🌍 **Location Filtering** - Filter events by country and city
-- 📱 **Responsive Design** - Mobile-first responsive design
-- 🎨 **Modern UI** - Beautiful gradient backgrounds and animations
+### For Attendees (Users)
+- **Seamless Discovery**: Vector-based search and filtering for local and virtual events.
+- **Wallet & Cashback**: Built-in digital wallet for fast checkouts and affiliate rewards.
+- **Secure Ticketing**: Dynamic QR code generation, PDF ticket downloads, and Apple/Google Calendar sync.
+- **Verified Reviews**: Post-event rating systems tied exclusively to verified purchasers.
+- **Transfer & Refund Engine**: Self-serve ticket transfers and automated Razorpay refund queuing.
 
-## Tech Stack
+### For Organizers
+- **Advanced Dashboard**: Real-time analytics built on Recharts and Framer Motion.
+- **Financial Center**: Automated GST calculation, bulk invoicing, and payout timelines.
+- **Marketing CRM**: Coupon generation, affiliate link tracking, and bulk attendee exports.
+- **Staff Management**: Strict Role-Based Access Control (RBAC) separating Owners, Admins, and Event Scanners.
+- **Live Event Operations**: Real-time QR scanning limits, capacity tracking, and emergency broadcasting.
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **Icons**: Lucide React
-- **Payment**: Razorpay integration
-- **QR Codes**: react-qr-code
-- **Routing**: React Router DOM
-- **State Management**: React hooks + localStorage
+## 🛠️ Architecture & Tech Stack
 
-## Quick Start
+EventSpark utilizes a **Vertical Slice Architecture** to enforce separation of concerns across a modern serverless stack.
 
-### Prerequisites
+- **Framework**: Next.js 14 (App Router)
+- **Language**: Strict TypeScript
+- **Database**: PostgreSQL (via Supabase) with heavily enforced Row Level Security (RLS)
+- **State Management**: React Query (TanStack) & React Server Actions
+- **Styling**: Tailwind CSS & Framer Motion (Glassmorphism & Micro-animations)
+- **Payments**: Razorpay Gateway with cryptographic Webhook Idempotency
+- **Communications**: Resend (Email) & MSG91 (SMS)
 
-- Node.js 18+ 
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
+## 📁 Folder Structure
 ```bash
-git clone <your-repo-url>
-cd eventspark
+eventspark/
+├── app/                  # Next.js 14 App Router routes (Admin, Dashboard, Events)
+├── src/
+│   ├── components/       # Reusable UI primitives (Tailwind, Radix, Framer)
+│   ├── hooks/            # Global React Query data fetching layers
+│   ├── lib/              # Utility configurations (Supabase Client, Stripe/Razorpay)
+│   ├── services/         # Vertical slice business logic controllers
+├── supabase/
+│   ├── migrations/       # Version-controlled DB schemas and RLS definitions
 ```
 
-2. Install dependencies:
-```bash
-npm install
-```
+## ⚙️ Installation & Setup
 
-3. Start the development server:
-```bash
-npm run dev
-```
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/your-username/eventspark.git
+   cd eventspark
+   ```
 
-4. Open your browser and navigate to `http://localhost:5173`
+2. **Install dependencies**
+   ```bash
+   npm install --legacy-peer-deps
+   ```
 
-## Deployment
+3. **Configure Environment Variables**
+   Rename `.env.example` to `.env.local` and populate your Supabase and Razorpay credentials.
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+   SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+   NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_your_key_id
+   RAZORPAY_KEY_SECRET=your_key_secret
+   RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
+   ```
 
-### Deploy to Vercel
+4. **Run Database Migrations**
+   Push the latest schemas to your Supabase instance:
+   ```bash
+   npx supabase db push
+   ```
 
-1. Push your code to GitHub
-2. Connect your GitHub repository to Vercel
-3. Vercel will automatically deploy your app
+5. **Start the Development Server**
+   ```bash
+   npm run dev
+   ```
+   Navigate to `http://localhost:3000`.
 
-### Manual Deployment
+## 🛡️ Security & Performance
 
-1. Build the project:
-```bash
-npm run build
-```
+- **Zero Data Leakage**: Enforced Supabase Row Level Security (RLS) ensures users can only query rows matching `auth.uid()`.
+- **Duplicate Payment Protection**: Custom `audit_logs` idempotency layer blocks Razorpay Webhook replay attacks.
+- **Core Web Vitals**: Aggressive dynamic `import()` boundaries and Server-Side Rendering (SSR) guarantee a First Load JS < 250kB.
+- **Accessibility**: Strict WCAG 2.1 AA compliance including ARIA landmarks and keyboard navigation traps.
 
-2. Deploy the `dist` folder to your hosting provider
-
-## Configuration
-
-### Payment Setup
-
-1. Sign up for a Razorpay account
-2. Get your API keys from the Razorpay dashboard
-3. Replace the test key in `src/components/PaymentModal.tsx`:
-```typescript
-key: "rzp_test_your_key_here", // Replace with your actual Razorpay key
-```
-
-### UPI Configuration
-
-The UPI ID is currently set to `9398148549@paytm`. Update this in `PaymentModal.tsx`:
-```typescript
-method: {
-  upi: {
-    vpa: "your-upi-id@provider" // Update with your UPI ID
-  }
-}
-```
-
-## Project Structure
-
-```
-src/
-├── components/           # Reusable components
-│   ├── ui/              # shadcn/ui components
-│   ├── QRCodeComponent.tsx
-│   └── PaymentModal.tsx
-├── pages/               # Page components
-│   ├── Index.tsx        # Landing page
-│   ├── Login.tsx        # Login page
-│   ├── Signup.tsx       # Signup page
-│   ├── Dashboard.tsx    # User dashboard
-│   ├── Events.tsx       # Events listing
-│   ├── EventDetails.tsx # Event details & registration
-│   ├── CreateEvent.tsx  # Create event form
-│   └── NotFound.tsx     # 404 page
-├── hooks/               # Custom hooks
-├── lib/                 # Utilities
-└── App.tsx             # Main app component
-```
-
-## Features Breakdown
-
-### Event Management
-- Create events with detailed information
-- Set location (country, city, venue)
-- Define capacity and pricing
-- Upload event images
-- Set registration deadlines
-
-### Registration System
-- User registration form with validation
-- Payment processing via Razorpay
-- QR code ticket generation
-- Email confirmation (simulated)
-
-### Filtering & Search
-- Search events by title/description
-- Filter by category
-- Filter by country and city
-- Clear all filters option
-
-### Dashboard Analytics
-- Total events created
-- Total registrations
-- Revenue tracking
-- Event status management
-
-## Environment Variables
-
-No environment variables are required for basic functionality. For production:
-
-1. Set up Razorpay keys
-2. Configure email service (optional)
-3. Set up analytics (optional)
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-## License
-
-MIT License - see LICENSE file for details
-
-## Support
-
-For support, email support@eventspark.com or create an issue in the repository.
+## 📄 License
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.

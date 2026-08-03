@@ -1,154 +1,101 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
+import { useTheme } from "next-themes";
 import { OrganizationSwitcher } from "@/components/OrganizationSwitcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, MapPin, Users, Search, Filter, Sparkles } from "lucide-react";
+import { Calendar, MapPin, Search, Filter, Loader2, CalendarRange, Trash2, Sun, Moon } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
+import { useSearch } from "@/hooks/useSearch";
+import { EventCard } from "@/components/ui/EventCard";
+import { createBrowserClient } from "@supabase/ssr";
 
-const Events = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [countryFilter, setCountryFilter] = useState("all");
+const CATEGORIES_WITH_DOTS = [
+  { slug: "music", name: "Music", dotColor: "bg-purple-500" },
+  { slug: "tech", name: "Tech", dotColor: "bg-blue-500" },
+  { slug: "sports", name: "Sports", dotColor: "bg-emerald-500" },
+  { slug: "food", name: "Food", dotColor: "bg-orange-500" },
+  { slug: "arts", name: "Arts", dotColor: "bg-pink-500" },
+  { slug: "business", name: "Business", dotColor: "bg-indigo-500" },
+];
 
-  const events = [
-    {
-      id: 1,
-      title: "Tech Innovation Summit 2024",
-      date: "Dec 15, 2024",
-      time: "9:00 AM - 6:00 PM",
-      location: "San Francisco Convention Center",
-      city: "San Francisco",
-      country: "USA",
-      attendees: 450,
-      maxCapacity: 500,
-      image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&h=400&fit=crop",
-      category: "Technology",
-      price: "$75",
-      description: "Join industry leaders for a day of innovation and networking.",
-      isCompleted: false,
-      registrationOpen: true
-    },
-    {
-      id: 2,
-      title: "Goa Beach Music Festival",
-      date: "Jan 20, 2025",
-      time: "6:00 PM - 2:00 AM",
-      location: "Baga Beach",
-      city: "Goa",
-      country: "India",
-      attendees: 1200,
-      maxCapacity: 1500,
-      image: "https://images.unsplash.com/photo-1459749411175-04bf5292ceea?w=800&h=400&fit=crop",
-      category: "Entertainment",
-      price: "$50",
-      description: "Experience the ultimate beach party with international DJs.",
-      isCompleted: false,
-      registrationOpen: true
-    },
-    {
-      id: 3,
-      title: "Mumbai Design Workshop",
-      date: "Feb 5, 2025",
-      time: "10:00 AM - 4:00 PM",
-      location: "Design Hub Mumbai",
-      city: "Mumbai",
-      country: "India",
-      attendees: 89,
-      maxCapacity: 100,
-      image: "https://images.unsplash.com/photo-1559136555-9303baea8ebd?w=800&h=400&fit=crop",
-      category: "Design",
-      price: "$30",
-      description: "Learn modern design principles from industry experts.",
-      isCompleted: false,
-      registrationOpen: true
-    },
-    {
-      id: 4,
-      title: "Delhi Cultural Heritage Walk",
-      date: "Jan 15, 2025",
-      time: "8:00 AM - 12:00 PM",
-      location: "Red Fort Area",
-      city: "Delhi",
-      country: "India",
-      attendees: 45,
-      maxCapacity: 50,
-      image: "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=400&fit=crop",
-      category: "Cultural",
-      price: "Free",
-      description: "Explore Delhi's rich cultural heritage with expert guides.",
-      isCompleted: false,
-      registrationOpen: true
-    },
-    {
-      id: 5,
-      title: "Goa Photography Retreat",
-      date: "Mar 10, 2025",
-      time: "7:00 AM - 6:00 PM",
-      location: "Various beaches in South Goa",
-      city: "Goa",
-      country: "India",
-      attendees: 25,
-      maxCapacity: 30,
-      image: "https://images.unsplash.com/photo-1606983340126-99ab4feaa64a?w=800&h=400&fit=crop",
-      category: "Education",
-      price: "$80",
-      description: "Capture Goa's beauty with professional photography guidance.",
-      isCompleted: false,
-      registrationOpen: true
-    },
-    {
-      id: 6,
-      title: "Completed Tech Event",
-      date: "Nov 20, 2024",
-      time: "9:00 AM - 5:00 PM",
-      location: "Bangalore Tech Park",
-      city: "Bangalore",
-      country: "India",
-      attendees: 300,
-      maxCapacity: 300,
-      image: "https://images.unsplash.com/photo-1556761175-b413da4baf72?w=800&h=400&fit=crop",
-      category: "Technology",
-      price: "$40",
-      description: "This event has been completed successfully.",
-      isCompleted: true,
-      registrationOpen: false
-    }
-  ];
+function EventsDiscoveryContent() {
+  const searchParams = useSearchParams();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const [session, setSession] = useState<any>(null);
+  
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || "");
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(searchParams.get('category') || undefined);
+  const [locationFilter, setLocationFilter] = useState(searchParams.get('city') || "");
+  const [sortBy, setSortBy] = useState<'date_asc' | 'date_desc' | 'price_asc' | 'price_desc' | 'popularity'>('date_desc');
+  const [page, setPage] = useState(1);
+  const [isFree, setIsFree] = useState<boolean | undefined>();
+  const [hasAvailableSeats, setHasAvailableSeats] = useState<boolean | undefined>();
 
-  const filteredEvents = events.filter(event => {
-    const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         event.description.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || event.category.toLowerCase() === categoryFilter.toLowerCase();
-    const matchesLocation = locationFilter === "all" || event.city.toLowerCase() === locationFilter.toLowerCase();
-    const matchesCountry = countryFilter === "all" || event.country.toLowerCase() === countryFilter.toLowerCase();
-    return matchesSearch && matchesCategory && matchesLocation && matchesCountry;
+  // Simple debounce inline instead of hook for brevity
+  const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('q') || "");
+  
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    setMounted(true);
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session);
+    });
+  }, [supabase]);
+
+  // Update debounced search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const { events, totalPages, isLoading } = useSearch({
+    keyword: debouncedSearch,
+    category: categoryFilter,
+    location: locationFilter,
+    sortBy,
+    isFree,
+    hasAvailableSeats,
+    page,
+    limit: 12
   });
 
-  const uniqueCountries = Array.from(new Set(events.map(event => event.country)));
-  const uniqueCities = Array.from(new Set(events.map(event => event.city)));
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-      {/* Navigation */}
-      <nav className="px-6 py-4 border-b border-purple-800/50">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white pb-16 transition-colors duration-300">
+      {/* Navbar */}
+      <nav className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#0A0A0F]/70 backdrop-blur-md sticky top-0 z-50 transition-all">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <BrandLogo />
           <div className="flex items-center space-x-4">
-            <OrganizationSwitcher />
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-800"
+                aria-label="Toggle Dark Mode"
+              >
+                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
+              </button>
+            )}
             <Link href="/dashboard">
-              <Button variant="ghost" className="text-white hover:bg-white/10">
+              <Button variant="ghost" className="text-slate-700 dark:text-slate-300 hover:text-[#6C47FF] hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold rounded-[8px]">
                 Dashboard
               </Button>
             </Link>
             <Link href="/create-event">
-              <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
+              <Button className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-semibold rounded-[8px]">
                 Create Event
               </Button>
             </Link>
@@ -156,140 +103,209 @@ const Events = () => {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-4">Discover Events</h1>
-          <p className="text-xl text-purple-200">Find your next amazing experience</p>
-        </div>
-
-        {/* Search and Filters */}
-        <div className="mb-8 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-purple-400" />
-              <Input
-                placeholder="Search events..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 bg-white/10 border-purple-300/30 text-white placeholder:text-purple-300"
-              />
-            </div>
-            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-              <SelectTrigger className="w-full md:w-48 bg-white/10 border-purple-300/30 text-white">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Category" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Categories</SelectItem>
-                <SelectItem value="technology">Technology</SelectItem>
-                <SelectItem value="design">Design</SelectItem>
-                <SelectItem value="cultural">Cultural</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="education">Education</SelectItem>
-                <SelectItem value="entertainment">Entertainment</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={countryFilter} onValueChange={setCountryFilter}>
-              <SelectTrigger className="w-full md:w-48 bg-white/10 border-purple-300/30 text-white">
-                <SelectValue placeholder="Country" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Countries</SelectItem>
-                {uniqueCountries.map(country => (
-                  <SelectItem key={country} value={country.toLowerCase()}>{country}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={locationFilter} onValueChange={setLocationFilter}>
-              <SelectTrigger className="w-full md:w-48 bg-white/10 border-purple-300/30 text-white">
-                <SelectValue placeholder="City" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Cities</SelectItem>
-                {uniqueCities.map(city => (
-                  <SelectItem key={city} value={city.toLowerCase()}>{city}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {/* Events Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {filteredEvents.map((event) => (
-            <Card key={event.id} className="bg-white/10 backdrop-blur-sm border-purple-300/20 hover:bg-white/20 transition-all duration-300 group cursor-pointer">
-              <div className="aspect-video overflow-hidden rounded-t-lg">
-                <img 
-                  src={event.image} 
-                  alt={event.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
+      <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col lg:flex-row gap-10">
+        
+        {/* Filters Sidebar */}
+        <aside className="w-full lg:w-64 shrink-0 space-y-6 lg:sticky lg:top-28 self-start">
+          <div className="bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 rounded-[12px] p-6 shadow-sm space-y-6">
+            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+              <Filter className="h-4.5 w-4.5 text-[#6C47FF]" /> Filter Events
+            </h2>
+            
+            <div className="space-y-5">
+              {/* Search input */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Search</label>
+                <div className="relative">
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="Keywords..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-9 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-[8px]"
+                  />
+                </div>
               </div>
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-purple-800/50 text-purple-200">
-                      {event.category}
-                    </Badge>
-                    {event.isCompleted && (
-                      <Badge className="bg-red-600 text-white text-xs">Completed</Badge>
-                    )}
-                  </div>
-                  <span className="text-sm font-semibold text-green-300">
-                    {event.price === "Free" ? "Free" : `₹${parseFloat(event.price.replace('$', '')) * 75}`}
-                  </span>
+
+              {/* City filter */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Location</label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-3 h-4 w-4 text-slate-400" />
+                  <Input
+                    placeholder="City..."
+                    value={locationFilter}
+                    onChange={(e) => { setLocationFilter(e.target.value); setPage(1); }}
+                    className="pl-9 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-[8px]"
+                  />
                 </div>
-                <h3 className="text-xl font-semibold text-white mb-3 group-hover:text-purple-200 transition-colors">
-                  {event.title}
-                </h3>
-                <p className="text-purple-100 text-sm mb-4 line-clamp-2">
-                  {event.description}
+              </div>
+
+              {/* Sort filter */}
+              <div className="space-y-2">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Sort By</label>
+                <Select value={sortBy} onValueChange={(val: any) => { setSortBy(val); setPage(1); }}>
+                  <SelectTrigger className="w-full bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white rounded-[8px]">
+                    <SelectValue placeholder="Sort..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date_desc">Newest First</SelectItem>
+                    <SelectItem value="date_asc">Oldest First</SelectItem>
+                    <SelectItem value="popularity">Popularity</SelectItem>
+                    <SelectItem value="price_asc">Price: Low to High</SelectItem>
+                    <SelectItem value="price_desc">Price: High to Low</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Category checkboxes with colored dots */}
+              <div className="space-y-2.5">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Categories</label>
+                <div className="space-y-2 max-h-48 overflow-y-auto pr-1 hide-scrollbar">
+                  {CATEGORIES_WITH_DOTS.map((cat) => (
+                    <label key={cat.slug} className="flex items-center justify-between text-sm text-slate-700 dark:text-slate-350 cursor-pointer hover:text-[#6C47FF] transition-colors">
+                      <div className="flex items-center space-x-2.5">
+                        <input
+                          type="checkbox"
+                          checked={categoryFilter === cat.slug}
+                          onChange={(e) => {
+                            setCategoryFilter(e.target.checked ? cat.slug : undefined);
+                            setPage(1);
+                          }}
+                          className="rounded border-slate-300 dark:border-slate-700 text-[#6C47FF] focus:ring-[#6C47FF] w-4 h-4"
+                        />
+                        <span className="font-medium">{cat.name}</span>
+                      </div>
+                      <span className={`w-2.5 h-2.5 rounded-full ${cat.dotColor}`} />
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Toggle controls */}
+              <div className="space-y-3 pt-4 border-t border-slate-250 dark:border-slate-800">
+                <label className="flex items-center space-x-2.5 text-sm text-slate-750 dark:text-slate-300 cursor-pointer hover:text-[#6C47FF] transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={isFree || false}
+                    onChange={e => { setIsFree(e.target.checked ? true : undefined); setPage(1); }}
+                    className="rounded border-slate-300 dark:border-slate-700 text-[#6C47FF] focus:ring-[#6C47FF] w-4 h-4"
+                  />
+                  <span className="font-semibold text-xs uppercase tracking-wider text-slate-500">Free Events Only</span>
+                </label>
+                <label className="flex items-center space-x-2.5 text-sm text-slate-750 dark:text-slate-300 cursor-pointer hover:text-[#6C47FF] transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={hasAvailableSeats || false}
+                    onChange={e => { setHasAvailableSeats(e.target.checked ? true : undefined); setPage(1); }}
+                    className="rounded border-slate-300 dark:border-slate-700 text-[#6C47FF] focus:ring-[#6C47FF] w-4 h-4"
+                  />
+                  <span className="font-semibold text-xs uppercase tracking-wider text-slate-500">Hide Sold Out</span>
+                </label>
+              </div>
+
+              {/* Clear button */}
+              <Button 
+                variant="outline" 
+                className="w-full border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900 rounded-[8px]"
+                onClick={() => {
+                  setSearchTerm("");
+                  setDebouncedSearch("");
+                  setCategoryFilter(undefined);
+                  setLocationFilter("");
+                  setSortBy('date_desc');
+                  setIsFree(undefined);
+                  setHasAvailableSeats(undefined);
+                  setPage(1);
+                }}
+              >
+                <Trash2 className="h-4 w-4 mr-2" /> Clear Filters
+              </Button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Results */}
+        <main className="flex-1">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Explore Events</h1>
+            {isLoading && <Loader2 className="h-6 w-6 text-[#6C47FF] animate-spin" />}
+          </div>
+
+          {events.length === 0 && !isLoading ? (
+            <Card className="bg-white dark:bg-[#111118] border-slate-200 dark:border-slate-800 border-dashed py-20 text-center rounded-[12px] shadow-sm">
+              <CardContent className="flex flex-col items-center max-w-sm mx-auto space-y-4">
+                <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400">
+                  <Search className="h-8 w-8" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-white">No events found</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm">
+                  We couldn't find any events matching your combination of filters. Try clearing them to start over.
                 </p>
-                <div className="space-y-2 text-purple-100 mb-4">
-                  <div className="flex items-center">
-                    <Calendar className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.date}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.city}, {event.country}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Users className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{event.attendees}/{event.maxCapacity} registered</span>
-                  </div>
-                </div>
-                <Link href={`/events/${event.id}`}>
-                  <Button className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white">
-                    {event.isCompleted ? "View Details" : "View & Register"}
+                <div className="pt-2">
+                  <Button 
+                    className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white rounded-[8px]"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setDebouncedSearch("");
+                      setCategoryFilter(undefined);
+                      setLocationFilter("");
+                      setSortBy('date_desc');
+                      setIsFree(undefined);
+                      setHasAvailableSeats(undefined);
+                      setPage(1);
+                    }}
+                  >
+                    Reset Search Filters
                   </Button>
-                </Link>
+                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {events.map((event: any) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+              {isLoading && events.length === 0 && [1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className="h-[360px] bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 rounded-[12px] animate-pulse"></div>
+              ))}
+            </div>
+          )}
 
-        {filteredEvents.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-xl text-purple-200 mb-4">No events found matching your criteria</p>
-            <Button
-              onClick={() => {
-                setSearchTerm("");
-                setCategoryFilter("all");
-                setLocationFilter("all");
-                setCountryFilter("all");
-              }}
-              variant="outline"
-              className="border-purple-300 text-purple-100 hover:bg-purple-800/50"
-            >
-              Clear Filters
-            </Button>
-          </div>
-        )}
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-3 mt-12">
+              <Button 
+                variant="outline" 
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                className="bg-white dark:bg-[#111118] border-slate-200 dark:border-slate-850 rounded-[8px]"
+              >
+                Previous
+              </Button>
+              <span className="flex items-center px-4 text-slate-500 dark:text-slate-450 text-sm font-semibold">
+                Page {page} of {totalPages}
+              </span>
+              <Button 
+                variant="outline" 
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="bg-white dark:bg-[#111118] border-slate-200 dark:border-slate-850 rounded-[8px]"
+              >
+                Next
+              </Button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );
-};
+}
 
-export default Events;
+export default function EventsDiscoveryPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex justify-center items-center"><Loader2 className="animate-spin text-[#6C47FF] h-8 w-8" /></div>}>
+      <EventsDiscoveryContent />
+    </Suspense>
+  );
+}

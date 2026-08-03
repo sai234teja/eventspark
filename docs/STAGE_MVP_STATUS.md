@@ -15,7 +15,7 @@ This document captures the local status and correctness audit of EventSpark's co
 | 7 | **DB Registration creation** | **EXISTS AND WIRED** | Implemented inside `verify/route.ts` and `create/route.ts` to insert into public table `registrations`. |
 | 8 | **Email sending (Resend)** | **EXISTS AND WIRED** | Uses Resend API via helper [`src/utils/email.ts`](file:///c:/Users/ramug/EventSpark/eventspark/src/utils/email.ts). Invoked non-blocking in booking creation and verification paths. |
 | 9 | **"My Tickets" Page** | **EXISTS AND WIRED** | [`app/dashboard/tickets/page.tsx`](file:///c:/Users/ramug/EventSpark/eventspark/app/dashboard/tickets/page.tsx) & details page [`app/dashboard/tickets/[registrationId]/page.tsx`](file:///c:/Users/ramug/EventSpark/eventspark/app/dashboard/tickets/[registrationId]/page.tsx). |
-| 10 | **Organizer QR Scanner** | **EXISTS BUT BROKEN** | [`app/organizer/scanner/page.tsx`](file:///c:/Users/ramug/EventSpark/eventspark/app/organizer/scanner/page.tsx) exists but is currently a **placeholder/stub** containing: *"Scanner feature coming in a future stage."* |
+| 10 | **Organizer QR Scanner** | **EXISTS AND WIRED** | [`app/organizer/scanner/page.tsx`](file:///c:/Users/ramug/EventSpark/eventspark/app/organizer/scanner/page.tsx) and `/organizer/scan` alias route. Implemented a fully functional camera reader using `@zxing/library` with manual UUID input fallback and verified check-in updates via `/api/scan`. |
 
 ---
 

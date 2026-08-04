@@ -72,7 +72,7 @@ export const searchService = {
     if (error) throw error;
 
     // Post-Processing for array relations like prices, free/paid, capacity
-    let results = data || [];
+    let results: any[] = data || [];
     
     if (params.isFree !== undefined || params.minPrice !== undefined || params.maxPrice !== undefined || params.hasAvailableSeats) {
       results = results.filter((event: any) => {

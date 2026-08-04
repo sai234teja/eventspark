@@ -73,17 +73,17 @@ export default function CheckInPage() {
       if (!ticket) {
         toast.error('Invalid Ticket');
         setLastScanned({ status: 'invalid', message: 'Ticket not found' });
-      } else if (ticket.status === 'checked-in') {
+      } else if ((ticket as any).status === 'checked-in') {
         toast.error('Ticket already checked in!');
         setLastScanned({ status: 'warning', message: 'Already checked in', ticket });
-      } else if (ticket.status !== 'issued') {
-        toast.error(`Ticket is ${ticket.status}`);
-        setLastScanned({ status: 'invalid', message: `Ticket is ${ticket.status}`, ticket });
+      } else if ((ticket as any).status !== 'issued') {
+        toast.error(`Ticket is ${(ticket as any).status}`);
+        setLastScanned({ status: 'invalid', message: `Ticket is ${(ticket as any).status}`, ticket });
       } else {
         // Proceed to check in
         await checkInTicket.mutateAsync({
           organizationId: tenant.id,
-          ticketId: ticket.id,
+          ticketId: (ticket as any).id,
           userId: user.id,
           device: navigator.userAgent
         });

@@ -51,9 +51,9 @@ export const ticketService = {
    */
   async checkInTicket(organizationId: string, ticketId: string, userId: string, device: string = 'web') {
     // 1. Mark ticket as checked-in
-    const { error: updateError } = await supabase
+    const { error: updateError } = await (supabase as any)
       .from('tickets')
-      .update({ status: 'checked-in', checked_in_at: new Date().toISOString() })
+      .update({ status: 'checked-in', checked_in_at: new Date().toISOString() } as any)
       .eq('id', ticketId)
       .eq('organization_id', organizationId)
       .eq('status', 'issued'); // Duplicate detection
@@ -66,14 +66,14 @@ export const ticketService = {
     }
 
     // 2. Record check-in audit
-    const { error: logError } = await supabase
+    const { error: logError } = await (supabase as any)
       .from('ticket_checkins')
       .insert({
         organization_id: organizationId,
         ticket_id: ticketId,
         checked_in_by: userId,
         device
-      });
+      } as any);
 
     if (logError) throw logError;
 
@@ -84,9 +84,9 @@ export const ticketService = {
    * Cancels a ticket
    */
   async cancelTicket(organizationId: string, ticketId: string) {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('tickets')
-      .update({ status: 'cancelled' })
+      .update({ status: 'cancelled' } as any)
       .eq('id', ticketId)
       .eq('organization_id', organizationId);
     
@@ -100,9 +100,9 @@ export const ticketService = {
   async regenerateQRCode(organizationId: string, ticketId: string) {
     // Basic random token generation for the client fallback, though ideally this would be an RPC
     const newToken = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('tickets')
-      .update({ qr_token: newToken })
+      .update({ qr_token: newToken } as any)
       .eq('id', ticketId)
       .eq('organization_id', organizationId);
 

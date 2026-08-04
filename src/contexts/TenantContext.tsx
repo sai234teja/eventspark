@@ -57,13 +57,13 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         }
       } else {
         // Try to load from localStorage first
-        const savedOrgId = localStorage.getItem('activeOrganizationId');
+        const savedOrgId = typeof window !== 'undefined' ? localStorage.getItem('activeOrganizationId') : null;
         let selectedOrg = orgs.find(o => o.id === savedOrgId);
 
         if (!selectedOrg) {
           // If no saved org or saved org not in list, pick the first one
           selectedOrg = orgs[0];
-          localStorage.setItem('activeOrganizationId', selectedOrg.id);
+          if (typeof window !== 'undefined') { localStorage.setItem('activeOrganizationId', selectedOrg.id); }
         }
 
         setActiveOrganization(selectedOrg);
@@ -91,9 +91,9 @@ export const TenantProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const targetOrg = organizations.find(o => o.id === orgId);
     if (targetOrg) {
       setActiveOrganization(targetOrg);
-      localStorage.setItem('activeOrganizationId', targetOrg.id);
+      if (typeof window !== 'undefined') { localStorage.setItem('activeOrganizationId', targetOrg.id); }
       // Optional: Refresh the page or data
-      window.location.reload();
+      if (typeof window !== 'undefined') { window.location.reload(); }
     }
   };
 

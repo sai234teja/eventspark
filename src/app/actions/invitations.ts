@@ -13,10 +13,7 @@ const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 export async function acceptInvitationAction(token: string, userId: string) {
   try {
     // We call the RPC function to handle the transaction securely on the database
-    const { error } = await supabase.rpc('accept_invitation', {
-      token_val: token,
-      user_id_val: userId
-    });
+    const { error } = await (supabase as any).rpc('accept_invitation', { token_val: token, user_id_val: userId });
 
     if (error) {
       console.error("RPC Error:", error);

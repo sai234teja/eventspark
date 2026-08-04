@@ -19,7 +19,7 @@ export const transferService = {
       // 1. Validate Ticket isn't checked in, cancelled, or expired
       const ticket = await ticketService.verifyTicket(organizationId, ticketId, false);
       if (!ticket) throw new Error('Ticket not found');
-      if (ticket.status !== 'issued') throw new Error(`Ticket cannot be transferred (Status: ${ticket.status})`);
+      if ((ticket as any).status !== 'issued') throw new Error(`Ticket cannot be transferred (Status: ${(ticket as any).status})`);
 
       // 2. Generate secure transfer token
       const token = crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
@@ -27,16 +27,20 @@ export const transferService = {
       expiresAt.setHours(expiresAt.getHours() + 48); // 48 hour expiration
 
       // 3. Create transfer record
-      const { data, error } = await supabase.from('ticket_transfers').insert({
-        organization_id: organizationId,
-        from_user_id: fromUserId,
-        to_email: toEmail,
-        registration_id: registrationId,
-        transfer_token: token,
-        status: 'pending',
-        old_ticket_id: ticketId,
-        expires_at: expiresAt.toISOString(),
-      }).select().single();
+      const { data, error } = await (supabase as any)
+        .from('ticket_transfers')
+        .insert({
+          organization_id: organizationId,
+          from_user_id: fromUserId,
+          to_email: toEmail,
+          registration_id: registrationId,
+          transfer_token: token,
+          status: 'pending',
+          old_ticket_id: ticketId,
+          expires_at: expiresAt.toISOString()
+        } as any)
+        .select()
+        .single();
 
       if (error) throw error;
 
@@ -62,45 +66,46 @@ export const transferService = {
         .single();
 
       if (fetchError || !transfer) throw new Error('Transfer request not found or invalid.');
-      if (transfer.status !== 'pending') throw new Error(`Transfer is already ${transfer.status}.`);
-      if (new Date(transfer.expires_at) < new Date()) throw new Error('Transfer has expired.');
+      if ((transfer as any).status !== 'pending') throw new Error(`Transfer is already ${(transfer as any).status}.`);
+      if (new Date((transfer as any).expires_at) < new Date()) throw new Error('Transfer has expired.');
 
       // 2. Invalidate previous QR and regenerate
-      const newToken = await ticketService.regenerateQRCode(organizationId, transfer.old_ticket_id);
+      const newToken = await ticketService.regenerateQRCode(organizationId, (transfer as any).old_ticket_id);
       
       // 3. Update registration ownership (mocking the user update in registration_data)
       const { data: reg, error: regError } = await supabase
         .from('registrations')
         .select('registration_data')
-        .eq('id', transfer.registration_id)
+        .eq('id', (transfer as any).registration_id)
         .single();
         
       if (regError) throw regError;
+if (!reg) throw new Error('Registration not found');
       
       const newRegData = {
-        ...(reg.registration_data as any),
+        ...((reg as any).registration_data),
         user_id: acceptingUserId,
-        email: transfer.to_email
+        email: (transfer as any).to_email
       };
 
-      await supabase
+      await (supabase as any)
         .from('registrations')
-        .update({ registration_data: newRegData })
-        .eq('id', transfer.registration_id);
+        .update({ registration_data: newRegData } as any)
+        .eq('id', (transfer as any).registration_id);
 
       // 4. Mark Transfer as Accepted
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('ticket_transfers')
-        .update({ 
+        .update({
           status: 'accepted',
           accepted_at: new Date().toISOString(),
-          new_ticket_id: transfer.old_ticket_id // Reusing the ticket row, just swapping token and owner
-        })
-        .eq('id', transfer.id);
+          new_ticket_id: (transfer as any).old_ticket_id // Reusing the ticket row, just swapping token and owner
+        } as any)
+        .eq('id', (transfer as any).id);
 
       if (updateError) throw updateError;
 
-      return { success: true, data: { newTicketId: transfer.old_ticket_id } };
+      return { success: true, data: { newTicketId: (transfer as any).old_ticket_id } };
     } catch (e: any) {
       return { success: false, error: e.message };
     }
@@ -108,9 +113,8 @@ export const transferService = {
 
   async rejectTransfer(organizationId: string, transferId: string): Promise<TransferResult> {
     try {
-      const { error } = await supabase
-        .from('ticket_transfers')
-        .update({ status: 'rejected', rejected_at: new Date().toISOString() })
+      const { error } = await ((supabase as any).from('ticket_transfers') as any)
+        .update({ status: 'rejected', rejected_at: new Date().toISOString() } as any)
         .eq('id', transferId)
         .eq('organization_id', organizationId)
         .eq('status', 'pending');
@@ -124,9 +128,8 @@ export const transferService = {
 
   async cancelTransfer(organizationId: string, transferId: string, userId: string): Promise<TransferResult> {
     try {
-      const { error } = await supabase
-        .from('ticket_transfers')
-        .update({ status: 'cancelled', cancelled_at: new Date().toISOString() })
+      const { error } = await ((supabase as any).from('ticket_transfers') as any)
+        .update({ status: 'cancelled', cancelled_at: new Date().toISOString() } as any)
         .eq('id', transferId)
         .eq('organization_id', organizationId)
         .eq('from_user_id', userId)

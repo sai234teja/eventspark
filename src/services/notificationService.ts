@@ -37,7 +37,7 @@ export const notificationService = {
     body: string,
     eventId?: number
   ) {
-    const { error } = await supabase
+    const { error } = await (supabase as any)
       .from('notifications')
       .insert({
         organization_id: organizationId,
@@ -47,7 +47,7 @@ export const notificationService = {
         body,
         event_id: eventId || null,
         delivery_status: 'pending'
-      });
+      } as any);
 
     if (error) throw error;
     return { success: true };
@@ -75,17 +75,17 @@ export const notificationService = {
       await new Promise(resolve => setTimeout(resolve, 500));
 
       // 2. Mark as delivered
-      await supabase
+      await (supabase as any)
         .from('notifications')
-        .update({ delivery_status: 'delivered' })
+        .update({ delivery_status: 'delivered' } as any)
         .eq('id', notificationId);
 
       return { success: true };
     } catch (err) {
       // Mark as failed
-      await supabase
+      await (supabase as any)
         .from('notifications')
-        .update({ delivery_status: 'failed' })
+        .update({ delivery_status: 'failed' } as any)
         .eq('id', notificationId);
       
       throw err;
@@ -97,11 +97,11 @@ export const notificationService = {
    */
   async resendNotification(notificationId: string, organizationId: string) {
     // Reset to pending
-    const { error } = await supabase
-      .from('notifications')
-      .update({ delivery_status: 'pending' })
-      .eq('id', notificationId)
-      .eq('organization_id', organizationId);
+      const { error } = await (supabase as any)
+        .from('notifications')
+        .update({ delivery_status: 'pending' } as any)
+        .eq('id', notificationId)
+        .eq('organization_id', organizationId);
 
     if (error) throw error;
     

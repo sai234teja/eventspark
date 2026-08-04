@@ -1,3 +1,5 @@
+import { isBrowser } from '@/lib/ssrGuard';
+
 export interface CalendarEvent {
   title: string;
   description: string;
@@ -25,17 +27,18 @@ export const generateICS = (event: CalendarEvent): string => {
     `DTSTART:${start}`,
     `DTEND:${end}`,
     `SUMMARY:${event.title.replace(/,/g, '\\,')}`,
-    `DESCRIPTION:${event.description.replace(/,/g, '\\,').replace(/\n/g, '\\n')}`,
+    `DESCRIPTION:${event.description.replace(/,/g, '\\,').replace(/\\n/g, '\\n')}`,
     `LOCATION:${event.location.replace(/,/g, '\\,')}`,
     'STATUS:CONFIRMED',
     'END:VEVENT',
-    'END:VCALENDAR'
+    'END:VCALENDAR',
   ].join('\r\n');
 
   return ics;
 };
 
 export const downloadICS = (event: CalendarEvent, filename: string = 'event.ics') => {
+  if (!isBrowser) return;
   const ics = generateICS(event);
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
   const url = window.URL.createObjectURL(blob);
@@ -51,7 +54,7 @@ export const downloadICS = (event: CalendarEvent, filename: string = 'event.ics'
 export const getGoogleCalendarUrl = (event: CalendarEvent): string => {
   const start = formatICSDate(event.startTime);
   const end = formatICSDate(event.endTime);
-  
+
   const params = new URLSearchParams({
     action: 'TEMPLATE',
     text: event.title,
@@ -66,7 +69,7 @@ export const getGoogleCalendarUrl = (event: CalendarEvent): string => {
 export const getOutlookCalendarUrl = (event: CalendarEvent): string => {
   const start = event.startTime.toISOString();
   const end = event.endTime.toISOString();
-  
+
   const params = new URLSearchParams({
     path: '/calendar/action/compose',
     rru: 'addevent',

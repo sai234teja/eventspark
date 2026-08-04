@@ -1,4 +1,5 @@
-import * as React from "react"
+import * as React from "react";
+import { isBrowser } from '@/lib/ssrGuard';
 
 const MOBILE_BREAKPOINT = 768
 
@@ -6,13 +7,13 @@ export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
 
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const mql = isBrowser ? window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`) : null;
     const onChange = () => {
-      setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
+      if (isBrowser) setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     }
-    mql.addEventListener("change", onChange)
-    setIsMobile(window.innerWidth < MOBILE_BREAKPOINT)
-    return () => mql.removeEventListener("change", onChange)
+    if (mql) mql.addEventListener("change", onChange)
+    setIsMobile(isBrowser ? window.innerWidth < MOBILE_BREAKPOINT : false)
+    return () => { if (mql) mql.removeEventListener('change', onChange); };
   }, [])
 
   return !!isMobile

@@ -33,12 +33,12 @@ export default function TicketsPage() {
   const handleExport = () => {
     if (!tickets) return;
     const exportData = tickets.map(t => ({
-      TicketNumber: t.ticket_number,
-      Event: t.event?.title || 'Unknown Event',
-      Status: t.status,
-      IssuedAt: new Date(t.issued_at).toLocaleString(),
-      CheckedInAt: t.checked_in_at ? new Date(t.checked_in_at).toLocaleString() : 'N/A',
-      Token: t.qr_token
+      TicketNumber: (t as any).ticket_number,
+      Event: (t as any).event?.title || 'Unknown Event',
+      Status: (t as any).status,
+      IssuedAt: new Date((t as any).issued_at).toLocaleString(),
+      CheckedInAt: (t as any).checked_in_at ? new Date((t as any).checked_in_at).toLocaleString() : 'N/A',
+      Token: (t as any).qr_token
     }));
     exportToCSV(exportData, `tickets-${tenant?.slug || 'export'}`);
   };

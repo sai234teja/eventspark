@@ -23,13 +23,15 @@ export const reminderService = {
     types: ReminderType[]
   ): Promise<ReminderResult> {
     try {
-      const { error } = await supabase.from('event_reminders').insert({
-        user_id: userId,
-        event_id: eventId,
-        interval,
-        types,
-        is_enabled: true
-      });
+      const { error } = await (supabase as any)
+        .from('event_reminders')
+        .insert({
+          user_id: userId,
+          event_id: eventId,
+          interval,
+          types,
+          is_enabled: true
+        } as any);
 
       if (error) throw error;
       return { success: true };
@@ -44,9 +46,9 @@ export const reminderService = {
     updates: { interval?: ReminderInterval; types?: ReminderType[]; is_enabled?: boolean }
   ): Promise<ReminderResult> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('event_reminders')
-        .update(updates)
+        .update(updates as any)
         .eq('id', reminderId)
         .eq('user_id', userId);
 

@@ -22,7 +22,7 @@ export const cancellationService = {
         .single();
         
       if (regError || !reg) throw new Error('Registration not found');
-      if (!reg.ticket_tiers?.refundable) throw new Error('This ticket tier is non-refundable.');
+      if (! (reg as any).ticket_tiers?.refundable) throw new Error('This ticket tier is non-refundable.');
       
       // 2. Insert request
       const { error } = await supabase.from('cancellation_requests').insert({
@@ -31,7 +31,7 @@ export const cancellationService = {
         registration_id: registrationId,
         reason,
         status: 'requested',
-      });
+      } as any);
 
       if (error) throw error;
       return { success: true };
@@ -57,19 +57,19 @@ export const cancellationService = {
 
       // 1. Process Refund via PaymentService (Razorpay logic)
       // Assuming paymentService handles Razorpay refunds if payment_id exists
-      if (request.registrations?.payment_id) {
+      if ((request as any).registrations?.payment_id) {
          // Mocking refund execution
          // await paymentService.processRefund(request.registrations.payment_id);
       }
 
       // 2. Update status
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('cancellation_requests')
         .update({
           status: 'refunded',
           approved_by: approvedByUserId,
           approved_at: new Date().toISOString()
-        })
+        } as any)
         .eq('id', cancellationId);
 
       if (updateError) throw updateError;
@@ -82,9 +82,9 @@ export const cancellationService = {
 
   async rejectRefund(organizationId: string, cancellationId: string): Promise<CancellationResult> {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('cancellation_requests')
-        .update({ status: 'rejected' })
+        .update({ status: 'rejected' } as any)
         .eq('id', cancellationId)
         .eq('organization_id', organizationId);
 

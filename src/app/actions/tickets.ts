@@ -10,7 +10,7 @@ const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 export async function issueTicketAction(organizationId: string, eventId: number, registrationId: string) {
   try {
-    const { data, error } = await supabase.rpc('issue_ticket', {
+    const { data, error } = await (supabase as any).rpc('issue_ticket', {
       p_organization_id: organizationId,
       p_event_id: eventId,
       p_registration_id: registrationId

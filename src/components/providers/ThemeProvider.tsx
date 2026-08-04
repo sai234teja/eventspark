@@ -1,5 +1,6 @@
 "use client";
 
+import { isBrowser } from "@/lib/ssrGuard";
 import React, { useEffect, useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
 import { useOrganizationSettings } from "@/lib/react-query/hooks/useOrganizations";
@@ -93,8 +94,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
       } else if (settings.theme_preference === 'light') {
         root.classList.remove('dark');
       } else {
-        // System
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        // System preference
+        if (isBrowser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
           root.classList.add('dark');
         } else {
           root.classList.remove('dark');

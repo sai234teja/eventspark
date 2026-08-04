@@ -1,5 +1,5 @@
 
-// Security utilities and configurations
+import { isBrowser } from '@/lib/ssrGuard';
 export const SECURITY_CONFIG = {
   // Rate limiting
   MAX_LOGIN_ATTEMPTS: 5,
@@ -56,9 +56,7 @@ export const createRateLimiter = (maxAttempts: number, windowMs: number) => {
 
 // HTTPS enforcement
 export const enforceHTTPS = () => {
-  if (typeof window !== 'undefined' && 
-      window.location.protocol === 'http:' && 
-      window.location.hostname !== 'localhost') {
+  if (isBrowser && window.location.protocol === 'http:' && window.location.hostname !== 'localhost') {
     window.location.href = window.location.href.replace('http:', 'https:');
   }
 };

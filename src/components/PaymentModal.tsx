@@ -1,5 +1,6 @@
 
 import { useState } from "react";
+import { isBrowser } from '@/lib/ssrGuard';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,27 +63,27 @@ const PaymentModal = ({ isOpen, onClose, onSuccess, eventTitle, price }: Payment
     }
 
     // Check if Razorpay script is already loaded
-    if (window.Razorpay) {
+    if (isBrowser && window.Razorpay) {
       initializeRazorpay();
     } else {
       // Load Razorpay script
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      script.onload = () => {
-        initializeRazorpay();
-      };
-      
-      script.onerror = () => {
-        setIsProcessing(false);
-        toast({
-          title: "Payment Error",
-          description: "Failed to load payment gateway. Please try again.",
-          variant: "destructive"
-        });
-      };
-      
-      document.head.appendChild(script);
+      if (isBrowser) {
+        const script = document.createElement('script');
+        script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+        script.async = true;
+        script.onload = () => {
+          initializeRazorpay();
+        };
+        script.onerror = () => {
+          setIsProcessing(false);
+          toast({
+            title: "Payment Error",
+            description: "Failed to load payment gateway. Please try again.",
+            variant: "destructive"
+          });
+        };
+        document.head.appendChild(script);
+      }
     }
   };
 

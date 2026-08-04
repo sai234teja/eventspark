@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     // Fetch the registration details
     const { data: registration, error: regErr } = await supabase
       .from('registrations')
-      .select('id, attendee_name, attendee_email, attendance_status, event_id, ticket_type_id')
+      .select('id, attendee_name, attendee_email, attendance_status, event_id, ticket_type_id, user_id')
       .eq('id', registrationId)
       .single();
 
@@ -103,6 +103,17 @@ export async function POST(request: Request) {
     if (updateErr) {
       return NextResponse.json({ error: 'Failed to update attendance status' }, { status: 500 });
     }
+
+    // Issue a certificate of participation
+    const credentialId = `CERT-${crypto.randomUUID().split('-')[0].toUpperCase()}`;
+    await supabase.from('user_certificates').insert({
+      user_id: registration.user_id, // Wait, registration might not select user_id, let me fix this below
+      certificate_name: `Certificate of Participation - ${eventData?.title || 'Event'}`,
+      issuing_organization: 'EventSpark Platform',
+      issue_date: new Date().toISOString(),
+      credential_id: credentialId,
+      credential_url: `https://eventspark-hzunqozhf-es-bd54.vercel.app/verify/${credentialId}`
+    }).select().single();
 
     return NextResponse.json({
       success: true,

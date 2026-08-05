@@ -15,6 +15,7 @@ const STORAGE_KEY = 'organizer_new_event_form';
 const STEPS = ['Event Details', 'Venue & Dates', 'Ticket Types', 'Review & Publish'];
 
 type TicketType = {
+  type: 'free' | 'paid';
   name: string;
   price: string;
   quantity_total: string;
@@ -34,7 +35,7 @@ type FormData = {
   ticket_types: TicketType[];
 };
 
-const EMPTY_TICKET: TicketType = { name: '', price: '0', quantity_total: '100', description: '' };
+const EMPTY_TICKET: TicketType = { type: 'paid', name: '', price: '', quantity_total: '100', description: '' };
 
 const INITIAL_FORM: FormData = {
   title: '',
@@ -357,16 +358,49 @@ export default function NewEventPage() {
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-xs font-medium text-slate-400">Price (₹) *</label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        value={ticket.price}
-                        onChange={e => updateTicket(index, { price: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500"
-                      />
+                      <label className="block text-xs font-medium text-slate-400">Type *</label>
+                      <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <button
+                          type="button"
+                          onClick={() => updateTicket(index, { type: 'free', price: '0' })}
+                          className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${
+                            ticket.type === 'free' ? 'bg-emerald-500/20 text-emerald-400' : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          Free
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateTicket(index, { type: 'paid', price: '' })}
+                          className={`flex-1 text-xs py-1.5 rounded-md font-medium transition-colors ${
+                            ticket.type === 'paid' ? 'bg-[#6C47FF]/20 text-[#6C47FF]' : 'text-slate-400 hover:text-white'
+                          }`}
+                        >
+                          Paid
+                        </button>
+                      </div>
                     </div>
+                    {ticket.type === 'paid' ? (
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-slate-400">Price (₹) *</label>
+                        <input
+                          type="number"
+                          min="1"
+                          step="0.01"
+                          value={ticket.price}
+                          onChange={e => updateTicket(index, { price: e.target.value })}
+                          className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white text-sm focus:outline-none focus:border-indigo-500"
+                          placeholder="e.g. 500"
+                        />
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-slate-400">Price</label>
+                        <div className="w-full px-3 py-2 rounded-lg bg-slate-800/50 border border-slate-700/50 text-emerald-400 font-bold text-sm flex items-center">
+                          FREE
+                        </div>
+                      </div>
+                    )}
                     <div className="space-y-1">
                       <label className="block text-xs font-medium text-slate-400">Quantity *</label>
                       <input

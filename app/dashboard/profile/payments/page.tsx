@@ -1,21 +1,30 @@
-'use client';
-
+import { createClient } from '../../../../../supabase/server';
+import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { CreditCard, Receipt, FileText, ArrowRightLeft, Loader2 } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
+import { CreditCard, Receipt, FileText, ArrowRightLeft } from 'lucide-react';
 
-export default function PaymentsPage() {
-  const { user } = useAuth();
-  // TODO: Use existing Payment hooks once mapped
-  const isLoading = false;
-  
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-      </div>
-    );
+export default async function PaymentsPage() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/auth/login');
   }
+
+  // Fetch orders for this user
+  const { data: orders } = await supabase
+    .from('orders')
+    .select(`
+      id,
+      total_amount,
+      status,
+      created_at,
+      events (
+        title
+      )
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
@@ -34,10 +43,37 @@ export default function PaymentsPage() {
             <CardDescription className="text-slate-400">Your recent payments and refunds on EventSpark.</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-center py-12 text-slate-500 border border-dashed border-slate-700 rounded-lg">
-              <ArrowRightLeft className="w-8 h-8 mx-auto mb-3 text-slate-600" />
-              <p>No transactions found.</p>
-            </div>
+            {orders && orders.length > 0 ? (
+              <div className="space-y-4">
+                {orders.map((order: any) => {
+                  const event = Array.isArray(order.events) ? order.events[0] : order.events;
+                  return (
+                    <div key={order.id} className="flex items-center justify-between p-4 bg-slate-800/30 border border-slate-700/50 rounded-lg">
+                      <div>
+                        <p className="font-bold text-white">{event?.title || 'Event Registration'}</p>
+                        <p className="text-xs text-slate-400">{new Date(order.created_at).toLocaleDateString()} • Order #{order.id.slice(0, 8)}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-bold text-white text-lg">
+                          {order.total_amount === 0 ? <span className="text-emerald-400">FREE</span> : `₹${order.total_amount}`}
+                        </p>
+                        <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full ${
+                          order.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 
+                          'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                        }`}>
+                          {order.status}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="text-center py-12 text-slate-500 border border-dashed border-slate-700 rounded-lg">
+                <ArrowRightLeft className="w-8 h-8 mx-auto mb-3 text-slate-600" />
+                <p>No transactions found.</p>
+              </div>
+            )}
           </CardContent>
         </Card>
 

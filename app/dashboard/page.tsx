@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { Ticket, CalendarDays, Wallet, ArrowRight, Search, Clock, MapPin, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
+import { ClientGreeting } from './ClientGreeting';
+
 export default async function DashboardOverview() {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -20,12 +22,6 @@ export default async function DashboardOverview() {
     .single();
 
   const userName = profile?.full_name?.split(' ')[0] || 'User';
-
-  // Determine greeting based on server time
-  const hour = new Date().getHours();
-  let greeting = 'Good evening';
-  if (hour < 12) greeting = 'Good morning';
-  else if (hour < 18) greeting = 'Good afternoon';
 
   // Fetch stats and upcoming events
   // We'll join registrations with events to get the event details
@@ -84,9 +80,7 @@ export default async function DashboardOverview() {
       {/* Welcome Banner */}
       <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-slate-800/60 rounded-2xl p-8 relative overflow-hidden">
         <div className="relative z-10">
-          <h1 className="text-3xl font-extrabold text-white mb-2">
-            {greeting}, {userName}! 👋
-          </h1>
+          <ClientGreeting userName={userName} />
           <p className="text-slate-400 max-w-xl">
             Welcome to your personal dashboard. Track your upcoming events, manage your tickets, and discover new experiences.
           </p>

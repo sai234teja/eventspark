@@ -1,108 +1,203 @@
 'use client';
 
-import { useProfile } from '@/hooks/useProfile';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, MapPin, Globe, Mail, Phone, Calendar } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { createBrowserClient } from '@supabase/ssr';
+import { useRouter } from 'next/navigation';
+import { User, Mail, Shield, Camera, Loader2, Save } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
 
-export default function ProfileOverview() {
-  const { profile, isLoading } = useProfile();
+export default function ProfilePage() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState({
+    id: '',
+    email: '',
+    full_name: '',
+    role: '',
+    avatar_url: ''
+  });
 
-  if (isLoading) {
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  useEffect(() => {
+    async function fetchProfile() {
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        router.replace('/auth/login');
+        return;
+      }
+
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      if (data) {
+        setProfile({
+          id: user.id,
+          email: user.email || '',
+          full_name: data.full_name || '',
+          role: data.role || 'user',
+          avatar_url: data.avatar_url || ''
+        });
+      }
+      setLoading(false);
+    }
+
+    fetchProfile();
+  }, [router, supabase]);
+
+  const handleChange = (field: string, value: string) => {
+    setProfile(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSave = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+    
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: profile.full_name
+        })
+        .eq('id', profile.id);
+
+      if (error) throw error;
+      
+      toast({
+        title: "Profile Updated",
+        description: "Your profile information has been saved successfully.",
+      });
+    } catch (err: any) {
+      toast({
+        title: "Error",
+        description: err.message || "Failed to update profile",
+        variant: "destructive"
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="text-center py-12 text-slate-400">
-        Profile data not available.
+      <div className="flex justify-center items-center h-64">
+        <Loader2 className="w-8 h-8 text-[#6C47FF] animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      {/* Cover Photo */}
-      <div className="h-48 rounded-xl bg-slate-800 overflow-hidden relative">
-        {profile.cover_photo_url ? (
-          <img src={profile.cover_photo_url} alt="Cover" className="w-full h-full object-cover opacity-80" />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-indigo-900/50 to-purple-900/50" />
-        )}
+    <div className="max-w-4xl mx-auto space-y-8">
+      <div>
+        <h1 className="text-3xl font-extrabold text-white mb-2">My Profile</h1>
+        <p className="text-slate-400">Manage your personal information and account settings.</p>
       </div>
 
-      {/* Avatar & Basic Info */}
-      <div className="px-6 relative -mt-16 sm:-mt-20 flex flex-col sm:flex-row items-center sm:items-end space-y-4 sm:space-y-0 sm:space-x-5">
-        <div className="w-32 h-32 rounded-full border-4 border-slate-900 bg-slate-800 overflow-hidden z-10 flex-shrink-0">
-          {profile.avatar_url ? (
-            <img src={profile.avatar_url} alt={profile.full_name || 'Avatar'} className="w-full h-full object-cover" />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-indigo-900/50 text-indigo-300 text-3xl font-bold">
-              {profile.full_name?.charAt(0) || 'U'}
-            </div>
-          )}
-        </div>
-        <div className="flex-1 text-center sm:text-left pb-2">
-          <h1 className="text-2xl font-bold text-white">{profile.full_name || 'User'}</h1>
-          {profile.headline && <p className="text-indigo-300 font-medium">{profile.headline}</p>}
-          <p className="text-slate-400 text-sm mt-1">{profile.username ? `@${profile.username}` : ''}</p>
-        </div>
-      </div>
-
-      <div className="px-6 grid grid-cols-1 md:grid-cols-3 gap-6 pt-4">
-        {/* Left Column: About & Contact */}
-        <div className="md:col-span-1 space-y-6">
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-xl">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-white text-lg">Contact Info</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {profile.location && (
-                <div className="flex items-center text-sm text-slate-300">
-                  <MapPin className="w-4 h-4 mr-3 text-slate-500" />
-                  {profile.location}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Avatar Sidebar */}
+        <div className="md:col-span-1">
+          <Card className="bg-[#111118] border-slate-800/60 text-center">
+            <CardContent className="pt-6 pb-6 flex flex-col items-center">
+              <div className="relative group cursor-pointer mb-4">
+                <div className="w-32 h-32 rounded-full bg-slate-800 border-4 border-slate-700 overflow-hidden relative">
+                  {profile.avatar_url ? (
+                    <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-indigo-500/20 text-indigo-400 text-4xl font-bold">
+                      {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : 'U'}
+                    </div>
+                  )}
+                  {/* Hover Overlay */}
+                  <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Camera className="w-8 h-8 text-white" />
+                  </div>
                 </div>
-              )}
-              {profile.website && (
-                <div className="flex items-center text-sm text-slate-300">
-                  <Globe className="w-4 h-4 mr-3 text-slate-500" />
-                  <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover:text-indigo-400 transition-colors">
-                    {profile.website.replace(/^https?:\/\//, '')}
-                  </a>
-                </div>
-              )}
-              {profile.phone && (
-                <div className="flex items-center text-sm text-slate-300">
-                  <Phone className="w-4 h-4 mr-3 text-slate-500" />
-                  {profile.phone}
-                </div>
-              )}
-              {profile.created_at && (
-                <div className="flex items-center text-sm text-slate-300">
-                  <Calendar className="w-4 h-4 mr-3 text-slate-500" />
-                  Joined {new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </div>
-              )}
+              </div>
+              <h3 className="text-xl font-bold text-white truncate w-full px-4">{profile.full_name || 'User'}</h3>
+              <p className="text-sm text-slate-400 truncate w-full px-4">{profile.email}</p>
+              
+              <div className="mt-6 flex items-center justify-center gap-2 px-3 py-1.5 bg-purple-500/10 text-purple-400 rounded-full text-xs font-bold uppercase tracking-wider">
+                <Shield className="w-3.5 h-3.5" />
+                {profile.role}
+              </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right Column: Bio & More */}
-        <div className="md:col-span-2 space-y-6">
-          <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-xl">
+        {/* Edit Form */}
+        <div className="md:col-span-2">
+          <Card className="bg-[#111118] border-slate-800/60">
             <CardHeader>
-              <CardTitle className="text-white text-lg">About</CardTitle>
+              <CardTitle className="text-white">Personal Information</CardTitle>
+              <CardDescription className="text-slate-400">
+                Update your name and other details here.
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              {profile.bio ? (
-                <p className="text-slate-300 whitespace-pre-wrap leading-relaxed">{profile.bio}</p>
-              ) : (
-                <p className="text-slate-500 italic">No bio provided yet.</p>
-              )}
-            </CardContent>
+            <form onSubmit={handleSave}>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="full_name" className="text-slate-300">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
+                    <Input
+                      id="full_name"
+                      value={profile.full_name}
+                      onChange={(e) => handleChange('full_name', e.target.value)}
+                      className="pl-10 bg-slate-900/50 border-slate-800 text-white placeholder:text-slate-600 focus-visible:ring-[#6C47FF]"
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-500" />
+                    <Input
+                      id="email"
+                      value={profile.email}
+                      readOnly
+                      disabled
+                      className="pl-10 bg-slate-900/80 border-slate-800 text-slate-400 cursor-not-allowed opacity-70"
+                    />
+                  </div>
+                  <p className="text-xs text-slate-500">Email cannot be changed directly.</p>
+                </div>
+
+                <div className="pt-4 border-t border-slate-800">
+                  <Button 
+                    type="submit" 
+                    className="bg-[#6C47FF] hover:bg-[#5835e5] text-white font-bold"
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </form>
           </Card>
         </div>
       </div>

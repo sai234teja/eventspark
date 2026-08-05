@@ -31,10 +31,9 @@ export const BrandLogo = ({ className = "", showText = true }: BrandLogoProps) =
       <span className="text-2xl font-bold" style={{ display: "flex", alignItems: "center" }}>
         <span style={{ marginRight: "0.25rem" }}>⚡</span>
         {showText && (
-          <>
-            <span className="text-black">Event</span>
-            <span className="text-[#6C47FF]">Spark</span>
-          </>
+          <span style={{fontWeight:700}}>
+            Event<span style={{color:'#6C47FF'}}>Spark</span>
+          </span>
         )}
       </span>
     </Link>

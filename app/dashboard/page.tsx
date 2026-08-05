@@ -1,7 +1,7 @@
 import { createClient } from '../../supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Ticket, CalendarDays, Wallet, ArrowRight, Search, Clock, MapPin } from 'lucide-react';
+import { Ticket, CalendarDays, Wallet, ArrowRight, Search, Clock, MapPin, Sparkles } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default async function DashboardOverview() {

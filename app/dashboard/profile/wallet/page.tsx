@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock, History } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { AddMoneyButton } from './AddMoneyButton';
 
 export default async function WalletPage() {
   const supabase = createClient();
@@ -57,10 +58,7 @@ export default async function WalletPage() {
             </div>
             
             <div className="mt-8">
-              <Button className="w-full bg-white text-indigo-900 hover:bg-slate-200 font-bold">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Money
-              </Button>
+              <AddMoneyButton />
             </div>
           </CardContent>
         </Card>

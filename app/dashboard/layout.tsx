@@ -33,6 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [userName, setUserName] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
+  const [userRole, setUserRole] = useState('user');
 
   useEffect(() => {
     const supabase = createBrowserClient(
@@ -50,15 +51,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name, avatar_url')
+        .select('full_name, avatar_url, role')
         .eq('id', user.id)
         .single();
 
       if (profile) {
         setUserName(profile.full_name || 'User');
         setAvatarUrl(profile.avatar_url || '');
+        setUserRole(profile.role || 'user');
       } else {
         setUserName('User');
+        setUserRole('user');
       }
 
       setLoading(false);
@@ -103,7 +106,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
           <div className="overflow-hidden">
             <p className="text-sm font-bold text-white truncate">{userName}</p>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">Attendee</p>
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">
+              {userRole === 'organizer' ? 'Organizer' : 'Attendee'}
+            </p>
           </div>
         </div>
       </div>

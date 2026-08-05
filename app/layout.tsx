@@ -7,6 +7,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { TenantProvider } from '@/contexts/TenantContext';
 import { ReactQueryProvider } from "@/lib/react-query/QueryProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { AIChatWidget } from "@/components/shared/AIChatWidget";
 
 export const metadata: Metadata = {
   title: 'EventSpark',
@@ -25,6 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   <Toaster />
                   <Sonner />
                   {children}
+                  <AIChatWidget />
                 </ThemeProvider>
               </TooltipProvider>
             </TenantProvider>

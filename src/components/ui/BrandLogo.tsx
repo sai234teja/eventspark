@@ -1,4 +1,4 @@
-export default function BrandLogo() {
+export function BrandLogo() {
   return (
     <div style={{display:'flex', alignItems:'center', gap:'8px'}}>
       <span style={{fontSize:'24px'}}>⚡</span>

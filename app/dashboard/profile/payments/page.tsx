@@ -1,4 +1,4 @@
-import { createClient } from '../../../../../supabase/server';
+import { createClient } from '../../../../supabase/server';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { CreditCard, Receipt, FileText, ArrowRightLeft } from 'lucide-react';

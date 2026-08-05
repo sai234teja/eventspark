@@ -202,8 +202,12 @@ function BookingContent({ eventId }: { eventId: string }) {
           {/* Progress Indicator */}
           <div className="flex items-center gap-2 text-xs font-bold tracking-wider uppercase text-slate-400">
             <span className={step === 1 ? "text-[#6C47FF]" : "text-slate-500"}>1. Details</span>
-            <span className="text-slate-600">→</span>
-            <span className={step === 2 ? "text-[#6C47FF]" : "text-slate-500"}>2. Payment</span>
+            {totalAmount > 0 && (
+              <>
+                <span className="text-slate-600">→</span>
+                <span className={step === 2 ? "text-[#6C47FF]" : "text-slate-500"}>2. Payment</span>
+              </>
+            )}
           </div>
         </div>
 
@@ -308,23 +312,34 @@ function BookingContent({ eventId }: { eventId: string }) {
 
               {/* Cost breakdown */}
               <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/60 text-xs">
-                <div className="flex justify-between items-center text-slate-500">
-                  <span className="font-medium">{ticketType?.name} × {quantity}</span>
-                  <span className="font-semibold text-slate-700 dark:text-slate-300">
-                    {ticketType?.price === 0 ? 'Free' : `₹${(ticketType?.price * quantity).toLocaleString('en-IN')}`}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-slate-500">
-                  <span className="font-medium">Booking Fee</span>
-                  <span className="font-semibold text-emerald-650 dark:text-emerald-400">FREE</span>
-                </div>
-                
-                <div className="flex justify-between items-center text-sm font-bold pt-3.5 border-t border-slate-100 dark:border-slate-850">
-                  <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Total Amount</span>
-                  <span className="text-[#6C47FF] text-base font-extrabold">
-                    {totalAmount === 0 ? 'Free' : `₹${totalAmount.toLocaleString('en-IN')}`}
-                  </span>
-                </div>
+                {totalAmount > 0 ? (
+                  <>
+                    <div className="flex justify-between items-center text-slate-500">
+                      <span className="font-medium">{ticketType?.name} × {quantity}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        ₹{(ticketType?.price * quantity).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center text-slate-500">
+                      <span className="font-medium">Booking Fee</span>
+                      <span className="font-semibold text-emerald-650 dark:text-emerald-400">FREE</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-sm font-bold pt-3.5 border-t border-slate-100 dark:border-slate-850">
+                      <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Total Amount</span>
+                      <span className="text-[#6C47FF] text-base font-extrabold">
+                        ₹{totalAmount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-center text-sm font-bold pt-1">
+                    <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Ticket Cost</span>
+                    <span className="text-emerald-500 text-base font-extrabold bg-emerald-500/10 px-2 py-1 rounded-md">
+                      FREE
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

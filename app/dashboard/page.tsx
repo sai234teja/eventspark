@@ -1,4 +1,4 @@
-import { createClient } from '../../../supabase/server';
+import { createClient } from '../../supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Ticket, CalendarDays, Wallet, ArrowRight, Search, Clock, MapPin } from 'lucide-react';
@@ -52,15 +52,20 @@ export default async function DashboardOverview() {
   // Filter for upcoming (assuming date is in future)
   const now = new Date();
   const upcomingRegistrations = (registrations || []).filter(reg => {
-    if (!reg.events || !reg.events.date) return false;
-    const eventDate = new Date(reg.events.date);
+    const event = Array.isArray(reg.events) ? reg.events[0] : reg.events;
+    if (!event || !event.date) return false;
+    const eventDate = new Date(event.date);
     return eventDate >= now;
   });
 
   const upcomingCount = upcomingRegistrations.length;
   // Take next 3 upcoming
   const nextThreeEvents = upcomingRegistrations
-    .sort((a, b) => new Date(a.events.date).getTime() - new Date(b.events.date).getTime())
+    .sort((a, b) => {
+      const eventA = Array.isArray(a.events) ? a.events[0] : a.events;
+      const eventB = Array.isArray(b.events) ? b.events[0] : b.events;
+      return new Date(eventA.date).getTime() - new Date(eventB.date).getTime();
+    })
     .slice(0, 3);
 
   // Wallet balance (mock for now, or fetch from wallet table if exists)
@@ -162,12 +167,14 @@ export default async function DashboardOverview() {
 
         {nextThreeEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {nextThreeEvents.map((reg) => (
+            {nextThreeEvents.map((reg) => {
+              const event = Array.isArray(reg.events) ? reg.events[0] : reg.events;
+              return (
               <Link href={`/dashboard/tickets/${reg.id}`} key={reg.id} className="block group">
                 <Card className="bg-[#111118] border-slate-800/60 h-full overflow-hidden hover:border-[#6C47FF]/50 transition-colors">
                   <div className="h-32 w-full overflow-hidden bg-slate-900 relative">
-                    {reg.events.image_url ? (
-                      <img src={reg.events.image_url} alt={reg.events.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    {event?.image_url ? (
+                      <img src={event.image_url} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
                         <Sparkles className="w-8 h-8 text-white/20" />
@@ -176,21 +183,21 @@ export default async function DashboardOverview() {
                     <div className="absolute inset-0 bg-gradient-to-t from-[#111118] to-transparent opacity-80" />
                   </div>
                   <CardContent className="p-5 -mt-6 relative z-10">
-                    <h3 className="font-bold text-white text-lg line-clamp-1 mb-3 group-hover:text-[#6C47FF] transition-colors">{reg.events.title}</h3>
+                    <h3 className="font-bold text-white text-lg line-clamp-1 mb-3 group-hover:text-[#6C47FF] transition-colors">{event?.title}</h3>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-slate-400 text-sm">
                         <CalendarDays className="w-4 h-4 shrink-0" />
-                        <span>{new Date(reg.events.date).toLocaleDateString()} at {reg.events.time}</span>
+                        <span>{event?.date ? new Date(event.date).toLocaleDateString() : ''} at {event?.time}</span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-400 text-sm">
                         <MapPin className="w-4 h-4 shrink-0" />
-                        <span className="truncate">{reg.events.location}</span>
+                        <span className="truncate">{event?.location}</span>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
-            ))}
+            )})}
           </div>
         ) : (
           <Card className="bg-[#111118] border-slate-800/60 border-dashed">

@@ -7,6 +7,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, ArrowLeft, Download, Printer, Ticket, Calendar, MapPin, User, Mail, Award } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import dynamic from 'next/dynamic';
+
+const Lanyard = dynamic(() => import('@/components/ui/Lanyard'), {
+  ssr: false,
+  loading: () => <div className="w-full h-full flex items-center justify-center bg-slate-900 rounded-3xl"><Loader2 className="w-8 h-8 text-indigo-400 animate-spin" /></div>
+});
 
 export default function TicketDetailPage() {
   const params = useParams();
@@ -126,7 +132,7 @@ export default function TicketDetailPage() {
         </div>
       </nav>
 
-      <main className="max-w-2xl mx-auto px-4 py-8 space-y-6">
+      <main className="max-w-6xl mx-auto px-4 py-8 space-y-6">
         {/* Actions - Hide on Print */}
         <div className="flex justify-between items-center print:hidden">
           <h1 className="text-2xl font-bold">Digital Entry Pass</h1>
@@ -137,6 +143,12 @@ export default function TicketDetailPage() {
             >
               <Printer className="w-4 h-4" /> Print Ticket
             </button>
+            <Link
+              href={`/dashboard/tickets/${registrationId}/invoice`}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white hover:bg-slate-700 text-sm transition-colors"
+            >
+              <Printer className="w-4 h-4" /> View Invoice
+            </Link>
             {registration.qr_code && (
               <a
                 href={registration.qr_code}
@@ -149,10 +161,12 @@ export default function TicketDetailPage() {
           </div>
         </div>
 
-        {/* Ticket Container */}
-        <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden print:border-2 print:border-black print:bg-white print:text-black shadow-2xl">
-          {/* Event Header Banner */}
-          <div className="h-48 relative bg-slate-950">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          
+          {/* Ticket Container (Left) */}
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden print:border-2 print:border-black print:bg-white print:text-black shadow-2xl">
+            {/* Event Header Banner */}
+            <div className="h-48 relative bg-slate-950">
             {event?.banner_url ? (
               <Image
                 src={event.banner_url}
@@ -267,7 +281,26 @@ export default function TicketDetailPage() {
                 <li>Tickets are non-refundable and subject to the organizer's venue policy.</li>
               </ul>
             </div>
+            </div>
           </div>
+          
+          {/* Lanyard 3D Viewer (Right) */}
+          <div className="w-full h-[60vh] lg:h-[800px] bg-slate-950/50 rounded-3xl border border-slate-800 overflow-hidden print:hidden relative lg:sticky lg:top-24">
+            <div className="absolute top-4 left-4 z-10">
+              <span className="text-xs font-bold text-[#FF9FFC] bg-[#FF9FFC]/10 px-3 py-1.5 rounded-full uppercase tracking-wider border border-[#FF9FFC]/20 shadow-lg shadow-[#FF9FFC]/5 backdrop-blur-md">
+                Interactive 3D Pass
+              </span>
+            </div>
+            <Lanyard 
+              attendeeName={registration.attendee_name}
+              ticketType={ticketType?.name || 'General Admission'}
+              avatarUrl={registration.avatar_url || null}
+              backImage={registration.qr_code || null}
+              fov={12}
+              position={[0, 0, 10]}
+            />
+          </div>
+
         </div>
       </main>
     </div>

@@ -5,6 +5,7 @@ import { Ticket, CalendarDays, Wallet, ArrowRight, Search, Clock, MapPin, Sparkl
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { ClientGreeting } from './ClientGreeting';
+import MagicBento from '@/components/ui/MagicBento';
 
 export default async function DashboardOverview() {
   const supabase = createClient();
@@ -25,30 +26,61 @@ export default async function DashboardOverview() {
 
   // Fetch stats and upcoming events
   // We'll join registrations with events to get the event details
+  // Fetch registrations and their respective orders
   const { data: registrations } = await supabase
     .from('registrations')
-    .select(`
-      id,
-      status,
-      created_at,
-      events (
-        id,
-        title,
-        date,
-        time,
-        location,
-        image_url
-      )
-    `)
+    .select('id, status, created_at, order_id')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+
+  // Get unique order IDs
+  const orderIds = registrations ? Array.from(new Set(registrations.map(r => r.order_id))) : [];
+
+  let eventsMap: Record<string, any> = {};
+
+  if (orderIds.length > 0) {
+    const { data: orders } = await supabase
+      .from('orders')
+      .select('id, event_id')
+      .in('id', orderIds);
+    
+    if (orders && orders.length > 0) {
+      const eventIds = Array.from(new Set(orders.map(o => o.event_id)));
+      
+      if (eventIds.length > 0) {
+        const { data: events, error: evError } = await supabase
+          .from('events')
+          .select('id, title, date:start_date, location:venue_name, image_url:banner_url')
+          .in('id', eventIds);
+          
+        if (evError) console.error("Error fetching events:", evError);
+          
+        if (events) {
+          eventsMap = events.reduce((acc, ev) => {
+            acc[ev.id] = ev;
+            return acc;
+          }, {});
+        }
+      }
+      
+      // Attach events to registrations via order
+      if (registrations) {
+        registrations.forEach(reg => {
+          const order = orders.find(o => o.id === reg.order_id);
+          if (order && eventsMap[order.event_id]) {
+            (reg as any).events = eventsMap[order.event_id];
+          }
+        });
+      }
+    }
+  }
 
   const totalTickets = registrations?.length || 0;
   
   // Filter for upcoming (assuming date is in future)
   const now = new Date();
   const upcomingRegistrations = (registrations || []).filter(reg => {
-    const event = Array.isArray(reg.events) ? reg.events[0] : reg.events;
+    const event = (reg as any).events;
     if (!event || !event.date) return false;
     const eventDate = new Date(event.date);
     return eventDate >= now;
@@ -58,8 +90,8 @@ export default async function DashboardOverview() {
   // Take next 3 upcoming
   const nextThreeEvents = upcomingRegistrations
     .sort((a, b) => {
-      const eventA = Array.isArray(a.events) ? a.events[0] : a.events;
-      const eventB = Array.isArray(b.events) ? b.events[0] : b.events;
+      const eventA = (a as any).events;
+      const eventB = (b as any).events;
       return new Date(eventA.date).getTime() - new Date(eventB.date).getTime();
     })
     .slice(0, 3);
@@ -89,66 +121,58 @@ export default async function DashboardOverview() {
         <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/4 w-96 h-96 bg-[#6C47FF]/20 rounded-full blur-3xl opacity-50" />
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Link href="/events" className="flex flex-col items-center justify-center p-4 bg-[#111118] border border-slate-800/60 rounded-xl hover:bg-slate-800/40 transition-colors group">
-          <div className="w-12 h-12 bg-indigo-500/10 text-indigo-400 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <Search className="w-6 h-6" />
-          </div>
-          <span className="text-sm font-bold text-slate-300">Browse Events</span>
-        </Link>
-        <Link href="/dashboard/tickets" className="flex flex-col items-center justify-center p-4 bg-[#111118] border border-slate-800/60 rounded-xl hover:bg-slate-800/40 transition-colors group">
-          <div className="w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
-            <Ticket className="w-6 h-6" />
-          </div>
-          <span className="text-sm font-bold text-slate-300">My Tickets</span>
-        </Link>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="bg-[#111118] border-slate-800/60">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-purple-500/10 text-purple-400 rounded-lg">
-                <CalendarDays className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Upcoming</p>
-                <p className="text-3xl font-extrabold text-white">{upcomingCount}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#111118] border-slate-800/60">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-500/10 text-blue-400 rounded-lg">
-                <Ticket className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Tickets</p>
-                <p className="text-3xl font-extrabold text-white">{totalTickets}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-[#111118] border-slate-800/60">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg">
-                <Wallet className="w-6 h-6" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-wider">Wallet Balance</p>
-                <p className="text-3xl font-extrabold text-white">₹{walletBalance}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Quick Actions & Stats Bento */}
+      <MagicBento 
+        textAutoHide={false}
+        enableStars
+        enableSpotlight
+        enableBorderGlow={true}
+        enableTilt={true}
+        enableMagnetism={true}
+        clickEffect
+        spotlightRadius={400}
+        particleCount={12}
+        glowColor="108, 71, 255"
+        disableAnimations={false}
+        cards={[
+          {
+            color: '#111118',
+            title: 'Upcoming Events',
+            description: `${upcomingCount} events registered`,
+            label: 'Stats'
+          },
+          {
+            color: '#111118',
+            title: 'Total Tickets',
+            description: `${totalTickets} passes secured`,
+            label: 'Stats'
+          },
+          {
+            color: '#111118',
+            title: 'Wallet Balance',
+            description: `₹${walletBalance} available`,
+            label: 'Wallet'
+          },
+          {
+            color: '#111118',
+            title: 'Browse Events',
+            description: 'Discover new experiences in your city',
+            label: 'Quick Action'
+          },
+          {
+            color: '#111118',
+            title: 'My Tickets',
+            description: 'View and download your digital passes',
+            label: 'Quick Action'
+          },
+          {
+            color: '#111118',
+            title: 'Profile Settings',
+            description: 'Manage your account details',
+            label: 'Quick Action'
+          }
+        ]}
+      />
 
       {/* Upcoming Events List */}
       <div>
@@ -161,7 +185,7 @@ export default async function DashboardOverview() {
 
         {nextThreeEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {nextThreeEvents.map((reg) => {
+            {nextThreeEvents.map((reg: any) => {
               const event = Array.isArray(reg.events) ? reg.events[0] : reg.events;
               return (
               <Link href={`/dashboard/tickets/${reg.id}`} key={reg.id} className="block group">
@@ -181,7 +205,7 @@ export default async function DashboardOverview() {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-slate-400 text-sm">
                         <CalendarDays className="w-4 h-4 shrink-0" />
-                        <span>{event?.date ? new Date(event.date).toLocaleDateString() : ''} at {event?.time}</span>
+                        <span>{event?.date ? new Date(event.date).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : ''}</span>
                       </div>
                       <div className="flex items-center gap-2 text-slate-400 text-sm">
                         <MapPin className="w-4 h-4 shrink-0" />

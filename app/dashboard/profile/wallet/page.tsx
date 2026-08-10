@@ -30,13 +30,33 @@ export default async function WalletPage() {
     const { data: txs } = await supabase
       .from('wallet_transactions')
       .select('*')
-      .eq('wallet_id', wallet.id)
-      .order('created_at', { ascending: false });
+      .eq('wallet_id', wallet.id);
       
     if (txs) {
       transactions = txs;
     }
   }
+
+  // Fetch ticket purchases (orders)
+  const { data: orders } = await supabase
+    .from('orders')
+    .select('id, total_amount, created_at, status, razorpay_payment_id')
+    .eq('user_id', user.id);
+
+  if (orders) {
+    const orderTxs = orders.map((o) => ({
+      id: o.id,
+      type: 'debit',
+      amount: o.total_amount,
+      created_at: o.created_at,
+      description: `Ticket Purchase (${o.razorpay_payment_id ? 'Online' : 'Wallet'})`,
+      status: o.status,
+    }));
+    transactions = [...transactions, ...orderTxs];
+  }
+
+  // Sort all transactions by date descending
+  transactions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
     <div className="space-y-8">

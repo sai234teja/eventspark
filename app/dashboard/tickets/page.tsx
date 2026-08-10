@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Ticket, Calendar, MapPin, Loader2, ArrowLeft } from 'lucide-react';
+import { Ticket, Calendar, MapPin, Loader2, ArrowLeft, Receipt } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 
 export default function MyTicketsPage() {
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [payments, setPayments] = useState<any[]>([]);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -43,6 +44,17 @@ export default function MyTicketsPage() {
         setRegistrations([]);
         setLoading(false);
         return;
+      }
+
+      // Fetch transaction history
+      const { data: paymentsData, error: paymentsErr } = await supabase
+        .from('payments')
+        .select('id, amount, currency, status, payment_method, created_at, provider_reference')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+        
+      if (!paymentsErr && paymentsData) {
+        setPayments(paymentsData);
       }
 
       // Fetch orders and ticket types and events manually to avoid complex RLS JOIN errors
@@ -179,6 +191,65 @@ export default function MyTicketsPage() {
             })}
           </div>
         )}
+        
+        {/* Transaction History Section */}
+        <div className="mt-16 border-t border-slate-800 pt-10">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-2 mb-6">
+            <Receipt className="h-6 w-6 text-indigo-400" /> Transaction History
+          </h2>
+          
+          {payments.length === 0 ? (
+            <div className="text-center py-10 bg-slate-900/30 border border-slate-800 rounded-xl">
+              <p className="text-slate-500 text-sm">No transaction history found.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm text-slate-300">
+                <thead className="bg-slate-900/80 text-slate-400 text-xs uppercase">
+                  <tr>
+                    <th className="px-4 py-3 font-medium rounded-tl-lg">Date</th>
+                    <th className="px-4 py-3 font-medium">Transaction ID</th>
+                    <th className="px-4 py-3 font-medium">Method</th>
+                    <th className="px-4 py-3 font-medium">Amount</th>
+                    <th className="px-4 py-3 font-medium rounded-tr-lg">Status</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800/60 bg-slate-900/20">
+                  {payments.map(payment => (
+                    <tr key={payment.id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        {new Date(payment.created_at).toLocaleDateString('en-IN', {
+                          day: 'numeric', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit'
+                        })}
+                      </td>
+                      <td className="px-4 py-4 font-mono text-xs text-slate-400">
+                        {payment.provider_reference || payment.id.split('-')[0]}
+                      </td>
+                      <td className="px-4 py-4 capitalize">
+                        {payment.payment_method || 'Card/UPI'}
+                      </td>
+                      <td className="px-4 py-4 font-medium text-white">
+                        {payment.currency === 'INR' ? '₹' : payment.currency}{payment.amount}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex px-2.5 py-1 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
+                          payment.status === 'completed' || payment.status === 'paid' || payment.status === 'successful'
+                            ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                            : payment.status === 'failed'
+                            ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
+                        }`}>
+                          {payment.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );

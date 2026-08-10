@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { Loader2, AlertCircle, Mail, User, KeyRound, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import SpecularButton from '@/components/ui/SpecularButton';
+import LightPillar from '@/components/ui/LightPillar';
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -86,8 +88,19 @@ export default function Signup() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0A0A0F] p-6 transition-colors duration-300">
-        <div className="w-full max-w-[440px] space-y-6 bg-white dark:bg-[#111118] p-8 rounded-[12px] shadow-sm border border-slate-200 dark:border-slate-800 text-center">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0A0A0F] p-6 transition-colors duration-300 relative overflow-hidden">
+        {/* LightPillar Background */}
+        <LightPillar
+          topColor="#6C47FF"
+          bottomColor="#FF9FFC"
+          intensity={1.2}
+          rotationSpeed={0.5}
+          interactive={true}
+          quality="high"
+          className="z-0 pointer-events-none opacity-60"
+          mixBlendMode="normal"
+        />
+        <div className="w-full max-w-[440px] space-y-6 bg-white dark:bg-[#111118] p-8 rounded-[12px] shadow-sm border border-slate-200 dark:border-slate-800 text-center relative z-10">
           <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500">
             <Mail className="h-7 w-7" />
           </div>
@@ -106,8 +119,19 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300">
-      <div className="w-full max-w-[440px] space-y-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300 relative overflow-hidden">
+      {/* LightPillar Background */}
+      <LightPillar
+        topColor="#6C47FF"
+        bottomColor="#FF9FFC"
+        intensity={1.2}
+        rotationSpeed={0.5}
+        interactive={true}
+        quality="high"
+        className="z-0 pointer-events-none opacity-60"
+        mixBlendMode="normal"
+      />
+      <div className="w-full max-w-[440px] space-y-6 relative z-10">
         
         {/* Branding header */}
         <div className="text-center space-y-2">
@@ -207,20 +231,32 @@ export default function Signup() {
               {errors.role && <p className="text-xs text-red-500 font-semibold">{errors.role.message}</p>}
             </div>
 
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full h-[48px] bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-bold rounded-[8px] text-sm tracking-wide transition-all shadow-md shadow-[#6C47FF]/10 flex items-center justify-center gap-2"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Creating account...
-                </>
-              ) : (
-                'Sign up'
-              )}
-            </Button>
+            <div className="w-full h-[48px] relative mt-2 block">
+              <SpecularButton
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-[48px] !px-0 !py-0 flex items-center justify-center gap-2 font-bold text-sm tracking-wide shadow-md shadow-[#6C47FF]/10"
+                radius={8}
+                tint="#6C47FF"
+                tintOpacity={1}
+                baseColor="#6C47FF"
+                lineColor="#ffffff"
+                textColor="#ffffff"
+                intensity={1}
+                thickness={1}
+                speed={0.4}
+                followMouse
+              >
+                {isLoading ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Creating account...
+                  </>
+                ) : (
+                  'Sign up'
+                )}
+              </SpecularButton>
+            </div>
           </form>
 
           {/* Social Sign In Divider */}

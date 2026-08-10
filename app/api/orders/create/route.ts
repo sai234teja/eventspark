@@ -97,6 +97,7 @@ export async function POST(request: Request) {
         attendee_email: attendeeEmail || '',
         qr_code: qrCode,
         attendance_status: 'not_checked_in',
+        avatar_url: body.avatarUrl || null,
       });
 
       if (regErr) {

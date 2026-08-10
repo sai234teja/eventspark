@@ -10,6 +10,9 @@ import { Search, MapPin, Calendar, Compass, Ticket, Sun, Moon, ArrowRight, Shiel
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Button } from "@/components/ui/button";
 import { EventCard } from "@/components/ui/EventCard";
+import BlurText from "@/components/ui/BlurText";
+import { SoftAurora } from "@/components/ui/SoftAurora";
+import LightPillar from "@/components/ui/LightPillar";
 
 const CATEGORY_COLORS: Record<string, { bg: string, text: string, border: string }> = {
   music: { bg: "bg-purple-50 dark:bg-purple-950/30", text: "text-purple-600 dark:text-purple-400", border: "hover:border-purple-500" },
@@ -101,44 +104,68 @@ export default function Home() {
             )}
             
             {session ? (
-              <Link href="/dashboard">
-                <Button className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white rounded-[8px] font-semibold">
-                  Dashboard
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={async () => {
+                    await supabase.auth.signOut();
+                    setSession(null);
+                  }}
+                  className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                >
+                  Log out
+                </button>
+                <Button asChild className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white rounded-[8px] font-semibold">
+                  <Link href="/dashboard">Dashboard</Link>
                 </Button>
-              </Link>
+              </div>
             ) : (
               <>
-                <Link href="/auth/login">
-                  <Button variant="ghost" className="text-slate-700 dark:text-slate-300 hover:text-[#6C47FF] hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold rounded-[8px]">
-                    Log in
-                  </Button>
-                </Link>
-                <Link href="/auth/signup">
-                  <Button className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-semibold rounded-[8px]">
-                    Sign up
-                  </Button>
-                </Link>
+                <Button asChild variant="ghost" className="text-slate-700 dark:text-slate-300 hover:text-[#6C47FF] hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold rounded-[8px]">
+                  <Link href="/auth/login">Log in</Link>
+                </Button>
+                <Button asChild className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-semibold rounded-[8px]">
+                  <Link href="/auth/signup">Sign up</Link>
+                </Button>
               </>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Hero Section */}
       <section className="relative pt-24 pb-32 px-6 flex flex-col items-center justify-center overflow-hidden border-b border-slate-200 dark:border-slate-800/40">
-        {/* Abstract background gradient decorations */}
-        <div className="absolute top-[-300px] left-[50%] -translate-x-[50%] w-[800px] h-[500px] bg-gradient-to-b from-[#6C47FF]/20 to-transparent blur-[120px] rounded-full -z-10" />
-        <div className="absolute top-[20%] left-[-200px] w-[500px] h-[500px] bg-gradient-to-r from-[#FF6B6B]/10 to-transparent blur-[120px] rounded-full -z-10" />
+        {/* Animated backgrounds */}
+        <div className="absolute inset-0 -z-10 opacity-70 dark:opacity-40">
+          <LightPillar
+            topColor="#6C47FF"
+            bottomColor="#FF9FFC"
+            intensity={1.2}
+            rotationSpeed={0.5}
+            interactive={true}
+            quality="high"
+            className="z-0 pointer-events-none opacity-80"
+            mixBlendMode="normal"
+          />
+        </div>
 
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-[24px] bg-[#6C47FF]/10 text-[#6C47FF] text-xs font-semibold uppercase tracking-wider mb-2">
             <Sparkles className="w-3.5 h-3.5" /> Next-Gen Ticketing & Discovery
           </div>
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-4">
-            Discover and book the <br/>
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B]">
-              Best Experiences
-            </span>
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-4 flex flex-col items-center">
+            <BlurText
+              text="Discover and book the"
+              delay={50}
+              animateBy="words"
+              direction="top"
+              className="mb-2"
+            />
+            <BlurText
+              text="Best Experiences"
+              delay={100}
+              animateBy="letters"
+              direction="bottom"
+              className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B]"
+            />
           </h1>
           <p className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Find and book tickets for the best tech conferences, music festivals, food meetups, and workshops happening in your city.
@@ -218,11 +245,11 @@ export default function Home() {
           </div>
 
           <div className="mt-10 text-center md:hidden">
-            <Link href="/events" className="block w-full">
-              <Button variant="outline" className="w-full border-slate-350 text-slate-700 dark:border-slate-800 dark:text-slate-300 font-semibold rounded-[8px]">
+            <Button asChild variant="outline" className="w-full border-slate-350 text-slate-700 dark:border-slate-800 dark:text-slate-300 font-semibold rounded-[8px]">
+              <Link href="/events" className="block w-full">
                 View all events &rarr;
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

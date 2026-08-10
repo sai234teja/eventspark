@@ -30,6 +30,7 @@ type FormData = {
   venue_name: string;
   venue_address: string;
   banner_url: string;
+  id_template_url: string;
   start_date: string;
   end_date: string;
   ticket_types: TicketType[];
@@ -45,6 +46,7 @@ const INITIAL_FORM: FormData = {
   venue_name: '',
   venue_address: '',
   banner_url: '',
+  id_template_url: '',
   start_date: '',
   end_date: '',
   ticket_types: [{ ...EMPTY_TICKET }],
@@ -150,6 +152,7 @@ export default function NewEventPage() {
         venue_name: form.venue_name.trim(),
         venue_address: form.venue_address.trim(),
         banner_url: form.banner_url.trim() || null,
+        id_template_url: form.id_template_url.trim() || null,
         start_date: form.start_date,
         end_date: form.end_date,
         organizer_id: user.id,
@@ -267,15 +270,27 @@ export default function NewEventPage() {
                 />
               </div>
             </div>
-            <div className="space-y-1">
-              <label className="block text-sm font-medium text-slate-300">Banner Image URL</label>
-              <input
-                type="url"
-                value={form.banner_url}
-                onChange={e => updateForm({ banner_url: e.target.value })}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-slate-300">Banner Image URL</label>
+                <input
+                  type="url"
+                  value={form.banner_url}
+                  onChange={e => updateForm({ banner_url: e.target.value })}
+                  placeholder="https://..."
+                  className="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="block text-sm font-medium text-slate-300">ID Pass Template URL</label>
+                <input
+                  type="url"
+                  value={form.id_template_url}
+                  onChange={e => updateForm({ id_template_url: e.target.value })}
+                  placeholder="Optional background for 3D Lanyard"
+                  className="w-full px-3 py-2.5 rounded-lg bg-slate-900 border border-slate-700 text-white placeholder:text-slate-600 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
             </div>
           </div>
         )}

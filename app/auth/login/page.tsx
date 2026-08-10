@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { Loader2, AlertCircle, KeyRound, Mail, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import LightPillar from '@/components/ui/LightPillar';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -70,8 +71,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300">
-      <div className="w-full max-w-[440px] space-y-6">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300 relative overflow-hidden">
+      {/* LightPillar Background */}
+      <LightPillar
+        topColor="#6C47FF"
+        bottomColor="#FF9FFC"
+        intensity={1.2}
+        rotationSpeed={0.5}
+        interactive={true}
+        quality="high"
+        className="z-0 pointer-events-none opacity-60"
+        mixBlendMode="normal"
+      />
+
+      <div className="w-full max-w-[440px] space-y-6 relative z-10">
         
         {/* Branding header */}
         <div className="text-center space-y-2">

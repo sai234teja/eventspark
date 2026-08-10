@@ -15,6 +15,8 @@ interface BrandPreviewProps {
   logoUrl?: string;
 }
 
+import { SoftAurora } from "./SoftAurora";
+
 export const BrandPreview = ({
   primaryColor,
   secondaryColor,
@@ -70,11 +72,22 @@ export const BrandPreview = ({
   const isDark = themePreference === "dark" || (themePreference === "system" && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
   return (
-    <div className={`brand-preview-container rounded-lg border overflow-hidden transition-colors ${isDark ? 'bg-slate-950 border-slate-800 text-slate-50' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
+    <div className={`brand-preview-container rounded-lg border overflow-hidden transition-colors relative ${isDark ? 'bg-slate-950 border-slate-800 text-slate-50' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
       <style dangerouslySetInnerHTML={{ __html: styleContent }} />
+      <div className="absolute inset-0 z-0 opacity-40">
+        <SoftAurora
+          speed={0.6}
+          scale={1.5}
+          brightness={1}
+          color1="#f7f7f7"
+          color2="#e100ff"
+          enableMouseInteraction
+          mouseInfluence={0.25}
+        />
+      </div>
       
       {/* Mock Header */}
-      <div className={`h-14 border-b flex items-center px-4 justify-between ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'}`}>
+      <div className={`relative z-10 h-14 border-b flex items-center px-4 justify-between ${isDark ? 'bg-slate-900/80 backdrop-blur-sm border-slate-800' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
         <div className="flex items-center space-x-2">
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="h-8 max-w-[120px] object-contain" />
@@ -92,7 +105,7 @@ export const BrandPreview = ({
       </div>
 
       {/* Mock Content */}
-      <div className="p-6 space-y-6">
+      <div className="relative z-10 p-6 space-y-6">
         <div>
           <h2 className="text-2xl font-bold mb-1">Upcoming Events</h2>
           <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Manage and track your organization's events.</p>

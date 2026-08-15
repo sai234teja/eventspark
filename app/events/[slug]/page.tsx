@@ -6,8 +6,10 @@ import { Calendar, MapPin, Building, ArrowLeft } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { TicketBookingWidget } from './TicketBookingWidget';
-
+import { EventShare } from '@/components/shared/EventShare';
+import { MagicSocialShare } from '@/components/ui/MagicSocialShare';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
+import { Users, Banknote } from 'lucide-react';
 
 export default async function EventDetailPage({ params }: { params: { slug: string } }) {
   const supabase = createClient();
@@ -139,6 +141,36 @@ export default async function EventDetailPage({ params }: { params: { slug: stri
                 <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5">{event.venue_address || event.city}</p>
               </div>
             </div>
+
+            <div className="flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0 text-[#6C47FF]">
+                <Users className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm">Capacity</h4>
+                <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5">
+                  {ticketTypes?.reduce((acc: number, curr: any) => acc + (curr.quantity_total || 0), 0) || event.total_capacity || 'Limited Seating'}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3.5">
+              <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0 text-[#6C47FF]">
+                <Banknote className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <h4 className="font-bold text-slate-900 dark:text-white text-sm">Payment Requirement</h4>
+                <p className="text-slate-600 dark:text-slate-400 text-xs mt-0.5">
+                  {ticketTypes?.every((t: any) => t.price === 0) ? 'Free Registration' : 'Payment Required for Paid Tickets'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Magic Social Share Menu */}
+          <div className="bg-white dark:bg-[#111118] rounded-[12px] border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-2 flex flex-col items-center">
+            <h4 className="font-bold text-slate-900 dark:text-white text-sm text-center">Share Event</h4>
+            <MagicSocialShare url={`/events/${event.slug}`} title={event.title} description={event.description} />
           </div>
 
           {/* Ticket booking widget (client component) */}

@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 import { useTenant } from "@/contexts/TenantContext";
 import { useOrganizationSettings } from "@/lib/react-query/hooks/useOrganizations";
 
+import { ThemeProvider as NextThemeProvider } from "next-themes";
+
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { activeOrganization } = useTenant();
   const { data: settings } = useOrganizationSettings(activeOrganization?.id);
@@ -88,20 +90,6 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         root.style.removeProperty('--brand-radius');
       }
 
-      // Theme Preference (Light/Dark/System)
-      if (settings.theme_preference === 'dark') {
-        root.classList.add('dark');
-      } else if (settings.theme_preference === 'light') {
-        root.classList.remove('dark');
-      } else {
-        // System preference
-        if (isBrowser && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-          root.classList.add('dark');
-        } else {
-          root.classList.remove('dark');
-        }
-      }
-
       // Update favicon
       if (settings.favicon_url) {
         let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
@@ -122,5 +110,9 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }, [settings]);
 
-  return <>{children}</>;
+  return (
+    <NextThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      {children}
+    </NextThemeProvider>
+  );
 };

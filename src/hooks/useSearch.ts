@@ -9,6 +9,7 @@ export const useSearch = (params: SearchParams) => {
       if (params.keyword) searchParams.set('q', params.keyword);
       if (params.location) searchParams.set('city', params.location);
       if (params.category) searchParams.set('category', params.category.toString());
+      if (params.isFree) searchParams.set('isFree', 'true');
 
       const res = await fetch(`/api/search?${searchParams.toString()}`);
       if (!res.ok) {

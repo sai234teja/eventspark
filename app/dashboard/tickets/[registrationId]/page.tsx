@@ -296,8 +296,8 @@ export default function TicketDetailPage() {
               ticketType={ticketType?.name || 'General Admission'}
               avatarUrl={registration.avatar_url || null}
               backImage={registration.qr_code || null}
-              fov={12}
-              position={[0, 0, 10]}
+              fov={25}
+              position={[0, 0, 15]}
             />
           </div>
 

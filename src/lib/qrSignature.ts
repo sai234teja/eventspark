@@ -1,11 +1,17 @@
 import crypto from 'crypto';
 
+/**
+ * Returns the QR signing secret.
+ * PRODUCTION SAFETY: Throws a hard error if QR_SIGNING_SECRET is not set.
+ * A missing secret would make all QR codes forgeable — fail closed.
+ */
 const getSecret = (): string => {
   const secret = process.env.QR_SIGNING_SECRET;
-  if (!secret) {
-    // Return a fallback secret or throw an error. For production safety, throw if missing.
-    // However, during test/build we can use a fallback.
-    return 'fallback_default_secret_for_eventspark_local_dev';
+  if (!secret || secret.length < 32) {
+    throw new Error(
+      'QR_SIGNING_SECRET environment variable is not set or is too short (minimum 32 characters). ' +
+      'QR ticket signing is disabled for security. Set this variable in your environment.'
+    );
   }
   return secret;
 };

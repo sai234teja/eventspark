@@ -6,11 +6,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Loader2, AlertCircle, Mail, User, KeyRound, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import SpecularButton from '@/components/ui/SpecularButton';
 import LightPillar from '@/components/ui/LightPillar';
+import { TearableCard } from '@/components/ui/TearableCard';
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
@@ -22,9 +24,11 @@ const signupSchema = z.object({
 type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function Signup() {
+  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [isTearing, setIsTearing] = useState(false);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -100,19 +104,31 @@ export default function Signup() {
           className="z-0 pointer-events-none opacity-60"
           mixBlendMode="normal"
         />
-        <div className="w-full max-w-[440px] space-y-6 bg-white dark:bg-[#111118] p-8 rounded-[12px] shadow-sm border border-slate-200 dark:border-slate-800 text-center relative z-10">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500">
-            <Mail className="h-7 w-7" />
-          </div>
-          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Check your email</h2>
-          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-            We've sent you a verification link. Please check your email to verify your account before logging in.
-          </p>
-          <div className="pt-4">
-            <Link href="/auth/login" className="text-[#6C47FF] hover:underline font-semibold flex items-center justify-center gap-1.5 text-sm">
-              <ArrowLeft className="w-4 h-4" /> Return to login
-            </Link>
-          </div>
+        <div className="w-full max-w-[440px] relative z-10">
+          <TearableCard
+            isTorn={isTearing}
+            onTearComplete={() => {
+              router.push('/auth/login');
+            }}
+          >
+            <div className="bg-white dark:bg-[#111118] p-8 rounded-[12px] shadow-sm border border-slate-200 dark:border-slate-800 text-center space-y-6">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mx-auto text-emerald-500">
+                <Mail className="h-7 w-7" />
+              </div>
+              <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Check your email</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                We've sent you a verification link. Please check your email to verify your account before logging in.
+              </p>
+              <div className="pt-4">
+                <button 
+                  onClick={() => setIsTearing(true)}
+                  className="text-[#6C47FF] hover:underline font-semibold flex items-center justify-center gap-1.5 text-sm mx-auto"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Return to login
+                </button>
+              </div>
+            </div>
+          </TearableCard>
         </div>
       </div>
     );

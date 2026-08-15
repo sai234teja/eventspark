@@ -13,6 +13,7 @@ import { EventCard } from "@/components/ui/EventCard";
 import BlurText from "@/components/ui/BlurText";
 import { SoftAurora } from "@/components/ui/SoftAurora";
 import LightPillar from "@/components/ui/LightPillar";
+import { LiquidNavbar } from "@/components/ui/LiquidNavbar";
 
 const CATEGORY_COLORS: Record<string, { bg: string, text: string, border: string }> = {
   music: { bg: "bg-purple-50 dark:bg-purple-950/30", text: "text-purple-600 dark:text-purple-400", border: "hover:border-purple-500" },
@@ -51,12 +52,24 @@ export default function Home() {
     // Fetch featured events (latest 3 published)
     supabase
       .from('events')
-      .select('*')
+      .select('*, ticket_types(price)')
       .eq('status', 'published')
       .order('created_at', { ascending: false })
       .limit(3)
       .then(({ data }) => {
-        if (data) setFeaturedEvents(data);
+        if (data) {
+          const processedData = data.map((event: any) => {
+            let minPrice = 0;
+            if (event.ticket_types && event.ticket_types.length > 0) {
+              minPrice = Math.min(...event.ticket_types.map((t: any) => t.price || 0));
+            }
+            return {
+              ...event,
+              price: minPrice
+            };
+          });
+          setFeaturedEvents(processedData);
+        }
       });
 
     // Fetch categories
@@ -81,56 +94,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] transition-colors duration-300 flex flex-col">
       {/* Navbar */}
-      <nav className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#0A0A0F]/70 backdrop-blur-md sticky top-0 z-50 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <BrandLogo />
-            <div className="hidden md:flex items-center space-x-6">
-              <Link href="/events" className="text-sm font-semibold text-slate-600 dark:text-slate-350 hover:text-[#6C47FF] dark:hover:text-[#6C47FF] transition-colors">
-                Browse Events
-              </Link>
-            </div>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-800"
-                aria-label="Toggle Dark Mode"
-              >
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-            )}
-            
-            {session ? (
-              <div className="flex items-center space-x-4">
-                <button
-                  onClick={async () => {
-                    await supabase.auth.signOut();
-                    setSession(null);
-                  }}
-                  className="text-sm font-semibold text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
-                >
-                  Log out
-                </button>
-                <Button asChild className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white rounded-[8px] font-semibold">
-                  <Link href="/dashboard">Dashboard</Link>
-                </Button>
-              </div>
-            ) : (
-              <>
-                <Button asChild variant="ghost" className="text-slate-700 dark:text-slate-300 hover:text-[#6C47FF] hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold rounded-[8px]">
-                  <Link href="/auth/login">Log in</Link>
-                </Button>
-                <Button asChild className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-semibold rounded-[8px]">
-                  <Link href="/auth/signup">Sign up</Link>
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <LiquidNavbar />
 
       <section className="relative pt-24 pb-32 px-6 flex flex-col items-center justify-center overflow-hidden border-b border-slate-200 dark:border-slate-800/40">
         {/* Animated backgrounds */}
@@ -154,14 +118,18 @@ export default function Home() {
           <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-4 flex flex-col items-center">
             <BlurText
               text="Discover and book the"
-              delay={50}
+              delay={30}
+              stepDuration={0.2}
+              animateOnMount={true}
               animateBy="words"
               direction="top"
               className="mb-2"
             />
             <BlurText
               text="Best Experiences"
-              delay={100}
+              delay={40}
+              stepDuration={0.2}
+              animateOnMount={true}
               animateBy="letters"
               direction="bottom"
               className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B]"

@@ -17,12 +17,13 @@ import {
   Loader2
 } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import { SoftAurora } from '@/components/ui/SoftAurora';
 
 const navItems = [
   { href: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { href: '/dashboard/tickets', label: 'My Tickets', icon: Ticket },
   { href: '/dashboard/wishlist', label: 'Wishlist', icon: Heart },
-  { href: '/dashboard/profile/wallet', label: 'Wallet', icon: Wallet },
+  { href: '/dashboard/wallet', label: 'Wallet', icon: Wallet },
   { href: '/dashboard/profile', label: 'Profile', icon: User },
 ];
 
@@ -91,8 +92,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const Sidebar = () => (
-    <aside className="flex flex-col h-full bg-[#111118] border-r border-slate-800/60 w-64">
-      <div className="px-6 py-6 border-b border-slate-800/60 space-y-4">
+    <aside className="flex flex-col h-full bg-white dark:bg-[#111118]/80 backdrop-blur-md border-r border-slate-200 dark:border-slate-800/60 w-64 transition-colors">
+      <div className="px-6 py-6 border-b border-slate-200 dark:border-slate-800/60 space-y-4">
         <BrandLogo />
         <div className="flex items-center gap-3 pt-2">
           <div className="w-10 h-10 rounded-full bg-slate-800 border border-slate-700 overflow-hidden flex-shrink-0">
@@ -105,8 +106,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             )}
           </div>
           <div className="overflow-hidden">
-            <p className="text-sm font-bold text-white truncate">{userName}</p>
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider truncate">
+            <p className="text-sm font-bold text-slate-900 dark:text-white truncate">{userName}</p>
+            <p className="text-[10px] text-slate-500 dark:text-slate-500 font-bold uppercase tracking-wider truncate">
               {userRole === 'organizer' ? 'Organizer' : 'Attendee'}
             </p>
           </div>
@@ -128,7 +129,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               className={`flex items-center gap-3 px-4 py-3 rounded-[8px] text-sm font-bold transition-all ${
                 isActive
                   ? 'bg-[#6C47FF] text-white shadow-md shadow-[#6C47FF]/10'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/40'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40'
               }`}
             >
               <Icon className="h-4.5 w-4.5 shrink-0" />
@@ -138,10 +139,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         })}
       </nav>
 
-      <div className="px-4 py-6 border-t border-slate-800/60">
+      <div className="px-4 py-6 border-t border-slate-200 dark:border-slate-800/60">
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-3 px-4 py-3 rounded-[8px] text-sm font-bold text-slate-400 hover:text-white hover:bg-slate-800/40 w-full transition-all"
+          className="flex items-center gap-3 px-4 py-3 rounded-[8px] text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/40 w-full transition-all"
         >
           <LogOut className="h-4.5 w-4.5 shrink-0" />
           Sign Out
@@ -151,9 +152,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div className="flex h-screen bg-[#0A0A0F] overflow-hidden text-white">
+    <div className="flex h-screen bg-slate-50 dark:bg-[#0A0A0F] overflow-hidden text-slate-900 dark:text-white relative">
+      {/* Premium dark mode background */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-0 dark:opacity-30">
+        <SoftAurora
+          color1="#6C47FF"
+          color2="#FF6B6B"
+          speed={0.5}
+        />
+      </div>
+
       {/* Desktop sidebar */}
-      <div className="hidden md:flex md:flex-col md:w-64 shrink-0">
+      <div className="hidden md:flex md:flex-col md:w-64 shrink-0 relative z-10">
         <Sidebar />
       </div>
 
@@ -168,17 +178,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       )}
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-auto">
+      <div className="flex-1 flex flex-col min-w-0 overflow-auto relative z-10">
         {/* Mobile topbar */}
-        <div className="md:hidden flex items-center justify-between px-6 py-4 bg-[#111118] border-b border-slate-800/60">
+        <div className="md:hidden flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-[#111118]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800/60 transition-colors">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="text-slate-400 hover:text-white transition-colors"
+              className="text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors"
             >
               <Menu className="h-6 w-6" />
             </button>
-            <span className="text-white font-bold text-sm">Dashboard</span>
+            <span className="text-slate-900 dark:text-white font-bold text-sm">Dashboard</span>
           </div>
           <Sparkles className="w-5 h-5 text-[#6C47FF]" />
         </div>
@@ -189,9 +199,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
       
       {/* Mobile Bottom Navigation */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-[#111118] border-t border-slate-800/60 px-6 py-3 flex justify-between items-center z-40">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-[#111118]/90 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800/60 px-6 py-3 flex justify-between items-center z-40 transition-colors">
         {navItems.slice(0, 4).map(({ href, icon: Icon }) => (
-          <Link key={href} href={href} className={`p-2 ${pathname === href ? 'text-[#6C47FF]' : 'text-slate-400'}`}>
+          <Link key={href} href={href} className={`p-2 ${pathname === href ? 'text-[#6C47FF]' : 'text-slate-500 dark:text-slate-400'}`}>
             <Icon className="h-6 w-6" />
           </Link>
         ))}

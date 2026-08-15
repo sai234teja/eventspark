@@ -1,0 +1,102 @@
+.magic-menu {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.magic-menu .magic-toggle {
+  position: relative;
+  height: 60px;
+  width: 60px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #333;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: 1.25s;
+  z-index: 5;
+}
+
+.dark .magic-menu .magic-toggle {
+  background: #111118;
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.5);
+}
+
+.magic-menu.active .magic-toggle {
+  transform: rotate(360deg);
+  box-shadow:
+    0 6px 8px rgba(0, 0, 0, 0.15),
+    0 0 0 2px #333,
+    0 0 0 8px #fff;
+}
+
+.dark .magic-menu.active .magic-toggle {
+  box-shadow:
+    0 6px 8px rgba(0, 0, 0, 0.5),
+    0 0 0 2px #fff,
+    0 0 0 8px #111118;
+}
+
+.magic-menu li {
+  position: absolute;
+  left: 0;
+  list-style: none;
+  transition: 0.5s;
+  transform: rotate(calc(360deg / 8 * var(--i)));
+  transform-origin: 100px;
+  scale: 0;
+  transition-delay: calc(0.05s * var(--i));
+}
+
+.magic-menu.active li {
+  scale: 1;
+}
+
+.magic-menu li a {
+  position: relative;
+  display: flex;
+  transform: rotate(calc(360deg / -8 * var(--i)));
+  width: 48px;
+  height: 48px;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--clr);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.15);
+  transition: 0.5s;
+  text-decoration: none;
+}
+
+.dark .magic-menu li a {
+  background-color: #1a1a24;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.5);
+}
+
+.magic-menu li a svg {
+  width: 20px;
+  height: 20px;
+}
+
+.magic-menu li:hover a {
+  transform: rotate(calc(360deg / -8 * var(--i))) scale(1.1);
+  box-shadow:
+    0 0 0 2px var(--clr),
+    0 0 0 6px #fff;
+}
+
+.dark .magic-menu li:hover a {
+  box-shadow:
+    0 0 0 2px var(--clr),
+    0 0 0 6px #111118;
+}

@@ -27,11 +27,15 @@ export default async function DashboardOverview() {
   // Fetch stats and upcoming events
   // We'll join registrations with events to get the event details
   // Fetch registrations and their respective orders
-  const { data: registrations } = await supabase
+  const { data: registrations, error: regError } = await supabase
     .from('registrations')
-    .select('id, status, created_at, order_id')
+    .select('id, attendance_status, created_at, order_id')
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
+  
+  if (regError) {
+    console.error("Error fetching registrations:", regError);
+  }
 
   // Get unique order IDs
   const orderIds = registrations ? Array.from(new Set(registrations.map(r => r.order_id))) : [];
@@ -194,8 +198,9 @@ export default async function DashboardOverview() {
                     {event?.image_url ? (
                       <img src={event.image_url} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-indigo-900 to-purple-900 flex items-center justify-center">
-                        <Sparkles className="w-8 h-8 text-white/20" />
+                      <div className="w-full h-full bg-gradient-to-br from-indigo-900/80 to-purple-900/80 flex flex-col items-center justify-center p-4 text-center">
+                        <CalendarDays className="w-8 h-8 text-indigo-300 mb-2 opacity-80" />
+                        <span className="text-white text-xs font-semibold opacity-90 line-clamp-2">{event?.title || 'Event Pass'}</span>
                       </div>
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-[#111118] to-transparent opacity-80" />

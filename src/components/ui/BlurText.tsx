@@ -15,6 +15,7 @@ type BlurTextProps = {
   easing?: Easing | Easing[];
   onAnimationComplete?: () => void;
   stepDuration?: number;
+  animateOnMount?: boolean;
 };
 
 const buildKeyframes = (
@@ -42,13 +43,19 @@ const BlurText: React.FC<BlurTextProps> = ({
   animationTo,
   easing = (t: number) => t,
   onAnimationComplete,
-  stepDuration = 0.35
+  stepDuration = 0.35,
+  animateOnMount = false
 }) => {
   const elements = animateBy === 'words' ? text.split(' ') : text.split('');
   const [inView, setInView] = useState(false);
   const ref = useRef<HTMLParagraphElement>(null);
 
   useEffect(() => {
+    if (animateOnMount) {
+      setInView(true);
+      return;
+    }
+    
     if (!ref.current) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -60,8 +67,19 @@ const BlurText: React.FC<BlurTextProps> = ({
       { threshold, rootMargin }
     );
     observer.observe(ref.current);
-    return () => observer.disconnect();
-  }, [threshold, rootMargin]);
+    
+    // Fallback if observer fails to trigger on initial view due to hydration
+    const timeout = setTimeout(() => {
+      if (ref.current && ref.current.getBoundingClientRect().top < window.innerHeight) {
+        setInView(true);
+      }
+    }, 200);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
+  }, [threshold, rootMargin, animateOnMount]);
 
   const defaultFrom = useMemo(
     () =>

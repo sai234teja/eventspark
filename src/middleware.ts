@@ -81,7 +81,12 @@ export async function middleware(request: NextRequest) {
       return redirectResponse
     }
 
-    if (pathname.startsWith('/organizer') && role !== 'organizer' && role !== 'admin') {
+    if (
+      pathname.startsWith('/organizer') && 
+      pathname !== '/organizer/register' && 
+      role !== 'organizer' && 
+      role !== 'admin'
+    ) {
       const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url))
       response.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value)

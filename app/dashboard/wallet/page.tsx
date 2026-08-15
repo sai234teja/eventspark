@@ -1,9 +1,11 @@
-import { createClient } from '../../../../supabase/server';
+import { createClient } from '../../../supabase/server';
 import { redirect } from 'next/navigation';
 import { Wallet, Plus, ArrowUpRight, ArrowDownLeft, Clock, History } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AddMoneyButton } from './AddMoneyButton';
+import { StaggeredList } from '@/components/ui/StaggeredList';
+import ElectricBorder from '@/components/ui/ElectricBorder';
 
 export default async function WalletPage() {
   const supabase = createClient();
@@ -84,7 +86,8 @@ export default async function WalletPage() {
         </Card>
 
         {/* Transactions Card */}
-        <Card className="bg-[#111118] border-slate-800/60 md:col-span-2 h-full flex flex-col">
+        <ElectricBorder color="#6C47FF" speed={0.8} chaos={0.15} borderRadius={12} className="md:col-span-2 h-full">
+        <Card className="bg-[#111118] border-slate-800/60 h-full flex flex-col">
           <CardHeader>
             <CardTitle className="text-white flex items-center gap-2">
               <History className="w-5 h-5 text-slate-400" />
@@ -94,29 +97,31 @@ export default async function WalletPage() {
           <CardContent className="flex-1">
             {transactions.length > 0 ? (
               <div className="space-y-4">
-                {transactions.map((tx) => (
-                  <div key={tx.id} className="flex items-center justify-between p-4 bg-slate-900/50 border border-slate-800 rounded-lg">
-                    <div className="flex items-center gap-4">
-                      <div className={`p-2 rounded-full ${
-                        tx.type === 'credit' 
-                          ? 'bg-emerald-500/10 text-emerald-400' 
-                          : 'bg-rose-500/10 text-rose-400'
-                      }`}>
-                        {tx.type === 'credit' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                <StaggeredList>
+                  {transactions.map((tx) => (
+                    <div key={tx.id} className="flex items-center justify-between p-4 bg-slate-900/50 border border-slate-800 rounded-lg">
+                      <div className="flex items-center gap-4">
+                        <div className={`p-2 rounded-full ${
+                          tx.type === 'credit' 
+                            ? 'bg-emerald-500/10 text-emerald-400' 
+                            : 'bg-rose-500/10 text-rose-400'
+                        }`}>
+                          {tx.type === 'credit' ? <ArrowDownLeft className="w-5 h-5" /> : <ArrowUpRight className="w-5 h-5" />}
+                        </div>
+                        <div>
+                          <p className="font-bold text-white capitalize">{tx.description || tx.type}</p>
+                          <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
+                            <Clock className="w-3 h-3" />
+                            {new Date(tx.created_at).toLocaleDateString()} at {new Date(tx.created_at).toLocaleTimeString()}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-bold text-white capitalize">{tx.description || tx.type}</p>
-                        <p className="text-xs text-slate-400 flex items-center gap-1 mt-1">
-                          <Clock className="w-3 h-3" />
-                          {new Date(tx.created_at).toLocaleDateString()} at {new Date(tx.created_at).toLocaleTimeString()}
-                        </p>
+                      <div className={`font-bold ${tx.type === 'credit' ? 'text-emerald-400' : 'text-white'}`}>
+                        {tx.type === 'credit' ? '+' : '-'}₹{tx.amount}
                       </div>
                     </div>
-                    <div className={`font-bold ${tx.type === 'credit' ? 'text-emerald-400' : 'text-white'}`}>
-                      {tx.type === 'credit' ? '+' : '-'}₹{tx.amount}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </StaggeredList>
               </div>
             ) : (
               <div className="h-full flex flex-col items-center justify-center text-center py-12">
@@ -129,6 +134,7 @@ export default async function WalletPage() {
             )}
           </CardContent>
         </Card>
+        </ElectricBorder>
       </div>
     </div>
   );

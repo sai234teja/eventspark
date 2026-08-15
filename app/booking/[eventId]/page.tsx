@@ -11,6 +11,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Stepper, { Step } from '@/components/ui/Stepper';
 import dynamic from 'next/dynamic';
+import { vibrateEngineSpool, playProcessingSound, vibrateClick } from '@/utils/audio';
 
 const Hyperspeed = dynamic(() => import('@/components/ui/Hyperspeed'), { ssr: false });
 
@@ -135,6 +136,8 @@ function BookingContent({ eventId }: { eventId: string }) {
     }
 
     setProcessing(true);
+    vibrateEngineSpool(); // Trigger warp engine haptics
+    playProcessingSound(); // Play techy scanning sound
     setError('');
 
     try {
@@ -142,9 +145,9 @@ function BookingContent({ eventId }: { eventId: string }) {
       
       if (avatarFile) {
         const fileExt = avatarFile.name.split('.').pop();
-        const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
         const { data: uploadData, error: uploadErr } = await supabase.storage
-          .from('user_avatars')
+          .from('avatars')
           .upload(fileName, avatarFile);
           
         if (uploadErr) {
@@ -152,7 +155,7 @@ function BookingContent({ eventId }: { eventId: string }) {
         }
         
         const { data: { publicUrl } } = supabase.storage
-          .from('user_avatars')
+          .from('avatars')
           .getPublicUrl(fileName);
           
         avatarUrl = publicUrl;
@@ -302,6 +305,7 @@ function BookingContent({ eventId }: { eventId: string }) {
             <div className="bg-white dark:bg-[#111118] rounded-[12px] border border-slate-200 dark:border-slate-800 p-2 shadow-sm">
               <Stepper
                 initialStep={1}
+                activeStep={step}
                 footerClassName="hidden"
               >
                 <Step>
@@ -368,6 +372,7 @@ function BookingContent({ eventId }: { eventId: string }) {
                     <div className="flex justify-end pt-4">
                       <button
                         onClick={() => {
+                          vibrateClick();
                           if (!attendeeName.trim() || !attendeeEmail.trim()) {
                             setError('Please fill in your name and email.');
                             return;
@@ -377,11 +382,15 @@ function BookingContent({ eventId }: { eventId: string }) {
                             return;
                           }
                           setError('');
-                          setStep(2);
+                          if (totalAmount === 0) {
+                            handleBooking();
+                          } else {
+                            setStep(2);
+                          }
                         }}
                         className="duration-350 flex items-center justify-center rounded-full bg-[#6C47FF] py-2.5 px-6 font-medium tracking-tight text-white transition hover:bg-[#5a3ae0]"
                       >
-                        Continue to Payment
+                        {totalAmount === 0 ? 'Register Free' : 'Continue to Payment'}
                       </button>
                     </div>
                   </div>
@@ -397,7 +406,10 @@ function BookingContent({ eventId }: { eventId: string }) {
                     {/* CTA action button */}
                     <div className="w-full relative mt-4 block">
                       <SpecularButton
-                        onClick={handleBooking}
+                        onClick={() => {
+                          vibrateClick();
+                          handleBooking();
+                        }}
                         disabled={processing}
                         className="w-full !px-0 !py-4 flex items-center justify-center gap-2 font-bold text-base shadow-lg shadow-[#FF6B6B]/10"
                         radius={8}
@@ -431,70 +443,68 @@ function BookingContent({ eventId }: { eventId: string }) {
 
           {/* Right Column: Order Summary Sticky Card */}
           <div className="space-y-6 lg:sticky lg:top-28 self-start">
-            <ElectricBorder color="#6C47FF" speed={0.5} chaos={0.1} borderRadius={12}>
-              <div className="bg-white dark:bg-[#111118] rounded-[12px] border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6 h-full">
-                <h2 className="text-base font-bold text-slate-900 dark:text-white pb-3 border-b border-slate-100 dark:border-slate-800">
-                  Order Summary
-                </h2>
+            <div className="bg-white dark:bg-[#111118] rounded-[12px] border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
+              <h2 className="text-base font-bold text-slate-900 dark:text-white pb-3 border-b border-slate-100 dark:border-slate-800">
+                Order Summary
+              </h2>
 
-                {/* Event Mini Details */}
-                {event && (
-                  <div className="flex gap-4">
-                    <div className="w-18 h-18 rounded-lg overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 relative">
-                      <Image
-                        src={event.banner_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&q=80"}
-                        alt={event.title}
-                        fill
-                        className="object-cover"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-bold text-slate-900 dark:text-white truncate text-sm">{event.title}</p>
-                      <p className="text-slate-500 text-xs mt-1 flex items-center gap-1 font-medium">
-                        <Calendar className="h-3 w-3 text-indigo-500" />
-                        {event.start_date ? new Date(event.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'TBA'}
-                      </p>
-                      <p className="text-slate-550 text-xs truncate mt-0.5 flex items-center gap-1 font-medium">
-                        <MapPin className="h-3 w-3 text-indigo-500" />
-                        {event.venue_name || event.city}
-                      </p>
-                    </div>
+              {/* Event Mini Details */}
+              {event && (
+                <div className="flex gap-4">
+                  <div className="w-20 h-20 rounded-lg overflow-hidden shrink-0 bg-slate-100 dark:bg-slate-800 relative">
+                    <Image
+                      src={event.banner_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=300&q=80"}
+                      alt={event.title}
+                      fill
+                      className="object-cover"
+                    />
                   </div>
-                )}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-900 dark:text-white truncate text-sm">{event.title}</p>
+                    <p className="text-slate-500 text-xs mt-1 flex items-center gap-1 font-medium">
+                      <Calendar className="h-3 w-3 text-indigo-500" />
+                      {event.start_date ? new Date(event.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' }) : 'TBA'}
+                    </p>
+                    <p className="text-slate-550 text-xs truncate mt-0.5 flex items-center gap-1 font-medium">
+                      <MapPin className="h-3 w-3 text-indigo-500" />
+                      {event.venue_name || event.city}
+                    </p>
+                  </div>
+                </div>
+              )}
 
-                {/* Cost breakdown */}
-                <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/60 text-xs">
-                  {totalAmount > 0 ? (
-                    <>
-                      <div className="flex justify-between items-center text-slate-500">
-                        <span className="font-medium">{ticketType?.name} × {quantity}</span>
-                        <span className="font-semibold text-slate-700 dark:text-slate-300">
-                          ₹{(ticketType?.price * quantity).toLocaleString('en-IN')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center text-slate-500">
-                        <span className="font-medium">Booking Fee</span>
-                        <span className="font-semibold text-emerald-650 dark:text-emerald-400">FREE</span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center text-sm font-bold pt-3.5 border-t border-slate-100 dark:border-slate-850">
-                        <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Total Amount</span>
-                        <span className="text-[#6C47FF] text-base font-extrabold">
-                          ₹{totalAmount.toLocaleString('en-IN')}
-                        </span>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="flex justify-between items-center text-sm font-bold pt-1">
-                      <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Ticket Cost</span>
-                      <span className="text-emerald-500 text-base font-extrabold bg-emerald-500/10 px-2 py-1 rounded-md">
-                        FREE
+              {/* Cost breakdown */}
+              <div className="space-y-3.5 pt-4 border-t border-slate-100 dark:border-slate-800/60 text-xs">
+                {totalAmount > 0 ? (
+                  <>
+                    <div className="flex justify-between items-center text-slate-500">
+                      <span className="font-medium">{ticketType?.name} × {quantity}</span>
+                      <span className="font-semibold text-slate-700 dark:text-slate-300">
+                        ₹{(ticketType?.price * quantity).toLocaleString('en-IN')}
                       </span>
                     </div>
-                  )}
-                </div>
+                    <div className="flex justify-between items-center text-slate-500">
+                      <span className="font-medium">Booking Fee</span>
+                      <span className="font-semibold text-emerald-650 dark:text-emerald-400">FREE</span>
+                    </div>
+                    
+                    <div className="flex justify-between items-center text-sm font-bold pt-3.5 border-t border-slate-100 dark:border-slate-850">
+                      <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Total Amount</span>
+                      <span className="text-[#6C47FF] text-base font-extrabold">
+                        ₹{totalAmount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="flex justify-between items-center text-sm font-bold pt-1">
+                    <span className="text-slate-900 dark:text-white uppercase tracking-wider text-xs">Ticket Cost</span>
+                    <span className="text-emerald-500 text-base font-extrabold bg-emerald-500/10 px-2 py-1 rounded-md">
+                      FREE
+                    </span>
+                  </div>
+                )}
               </div>
-            </ElectricBorder>
+            </div>
           </div>
 
         </div>

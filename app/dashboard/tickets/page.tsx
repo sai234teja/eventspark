@@ -4,8 +4,10 @@ import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import Image from 'next/image';
+import { motion } from 'motion/react';
 import { Ticket, Calendar, MapPin, Loader2, ArrowLeft, Receipt } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
+import ElectricBorder from '@/components/ui/ElectricBorder';
 
 export default function MyTicketsPage() {
   const [registrations, setRegistrations] = useState<any[]>([]);
@@ -53,9 +55,34 @@ export default function MyTicketsPage() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
         
+      let allPayments: any[] = [];
       if (!paymentsErr && paymentsData) {
-        setPayments(paymentsData);
+        allPayments = [...paymentsData];
       }
+
+      // Fetch ticket purchases (orders)
+      const { data: ordersData } = await supabase
+        .from('orders')
+        .select('id, total_amount, created_at, status, razorpay_payment_id')
+        .eq('user_id', user.id);
+
+      if (ordersData) {
+        const orderTxs = ordersData.map((o: any) => ({
+          id: o.id,
+          amount: o.total_amount,
+          currency: 'INR',
+          status: o.status,
+          payment_method: o.razorpay_payment_id ? 'Online' : 'Wallet',
+          created_at: o.created_at,
+          provider_reference: o.razorpay_payment_id || `ORD-${o.id.split('-')[0]}`,
+        }));
+        allPayments = [...allPayments, ...orderTxs];
+      }
+
+      // Sort all payments by date descending
+      allPayments.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      
+      setPayments(allPayments);
 
       // Fetch orders and ticket types and events manually to avoid complex RLS JOIN errors
       try {
@@ -198,6 +225,8 @@ export default function MyTicketsPage() {
             <Receipt className="h-6 w-6 text-indigo-400" /> Transaction History
           </h2>
           
+          <ElectricBorder color="#6C47FF" speed={0.8} chaos={0.15} borderRadius={16}>
+          <div className="bg-[#111118] border border-slate-800/60 rounded-2xl overflow-hidden">
           {payments.length === 0 ? (
             <div className="text-center py-10 bg-slate-900/30 border border-slate-800 rounded-xl">
               <p className="text-slate-500 text-sm">No transaction history found.</p>
@@ -215,8 +244,14 @@ export default function MyTicketsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60 bg-slate-900/20">
-                  {payments.map(payment => (
-                    <tr key={payment.id} className="hover:bg-slate-800/30 transition-colors">
+                  {payments.map((payment, index) => (
+                    <motion.tr 
+                      key={payment.id} 
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.05 }}
+                      className="hover:bg-slate-800/30 transition-colors"
+                    >
                       <td className="px-4 py-4 whitespace-nowrap">
                         {new Date(payment.created_at).toLocaleDateString('en-IN', {
                           day: 'numeric', month: 'short', year: 'numeric',
@@ -243,12 +278,14 @@ export default function MyTicketsPage() {
                           {payment.status}
                         </span>
                       </td>
-                    </tr>
+                    </motion.tr>
                   ))}
                 </tbody>
               </table>
             </div>
           )}
+          </div>
+          </ElectricBorder>
         </div>
       </main>
     </div>

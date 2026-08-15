@@ -1,9 +1,11 @@
 import { NextResponse } from 'next/server';
 import { createClient as createSupabaseAdmin } from '@supabase/supabase-js';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
 import Razorpay from 'razorpay';
 import { sendBookingConfirmationEmail } from '../../../../src/utils/email';
 
-// Service-role client that bypasses RLS for order creation
+// Service-role client that bypasses RLS for order creation and inventory management
 function getAdminClient() {
   return createSupabaseAdmin(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -11,13 +13,52 @@ function getAdminClient() {
   );
 }
 
+/**
+ * Returns the authenticated user ID from the server-side session cookie.
+ * NEVER trusts userId from the request body.
+ */
+async function getAuthenticatedUserId(): Promise<string | null> {
+  const cookieStore = cookies();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            );
+          } catch {
+            // Ignore inside Route Handler
+          }
+        },
+      },
+    }
+  );
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) return null;
+  return user.id;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { ticketTypeId, quantity, eventId } = body;
+    const { ticketTypeId, quantity, eventId, attendeeName, attendeeEmail } = body;
 
     if (!ticketTypeId || !quantity || !eventId) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+    }
+
+    // SECURITY: Authenticate user from server-side session.
+    // Never trust userId from the request body — it is an IDOR vulnerability.
+    const userId = await getAuthenticatedUserId();
+    if (!userId) {
+      return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
 
     const supabase = getAdminClient();
@@ -33,6 +74,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Ticket type not found' }, { status: 404 });
     }
 
+    // Verify the ticket belongs to the requested event (prevent ticket<->event mismatch attacks)
+    if (ticketType.event_id !== eventId) {
+      return NextResponse.json({ error: 'Ticket type does not belong to this event' }, { status: 400 });
+    }
+
     const available = ticketType.quantity_total - (ticketType.quantity_sold || 0);
     if (available < quantity) {
       return NextResponse.json(
@@ -41,18 +87,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Get authenticated user from Authorization header cookie
-    // We accept user_id directly from body for now — validated by RLS on insert
-    const { userId, attendeeName, attendeeEmail } = body;
-    if (!userId) {
-      return NextResponse.json({ error: 'User not authenticated' }, { status: 401 });
-    }
-
     const totalAmount = ticketType.price * quantity;
 
-    // 3. For FREE tickets — skip Razorpay, return special flag
+    // 2. For FREE tickets — skip Razorpay, complete immediately
     if (totalAmount === 0) {
-      // Insert order with status 'paid' directly
       const { data: order, error: orderErr } = await supabase
         .from('orders')
         .insert({
@@ -66,22 +104,23 @@ export async function POST(request: Request) {
         .single();
 
       if (orderErr || !order) {
-        return NextResponse.json({ error: orderErr?.message || 'Failed to create order' }, { status: 500 });
+        console.error('Free order create error:', orderErr);
+        return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
       }
 
-      // Increment quantity_sold
-      await supabase.rpc('increment_quantity_sold', {
+      // Increment quantity_sold atomically via RPC (FOR UPDATE lock inside)
+      const { error: rpcErr } = await supabase.rpc('increment_quantity_sold', {
         p_ticket_type_id: ticketTypeId,
         p_quantity: quantity,
-      }).then(() => null); // best-effort via RPC (fallback below)
+      });
 
-      // Fallback direct update if RPC not set up
-      await supabase
-        .from('ticket_types')
-        .update({ quantity_sold: (ticketType.quantity_sold || 0) + quantity })
-        .eq('id', ticketTypeId);
+      if (rpcErr) {
+        // Roll back order if inventory fails
+        await supabase.from('orders').delete().eq('id', order.id);
+        return NextResponse.json({ error: 'Insufficient ticket inventory' }, { status: 409 });
+      }
 
-      // Generate registration
+      // Generate signed QR payload
       const { signQrPayload } = await import('@/lib/qrSignature');
       const QRCode = (await import('qrcode')).default;
       const regId = crypto.randomUUID();
@@ -92,7 +131,7 @@ export async function POST(request: Request) {
         id: regId,
         order_id: order.id,
         ticket_type_id: ticketTypeId,
-        user_id: userId,
+        user_id: userId,                           // Authoritative from server session
         attendee_name: attendeeName || '',
         attendee_email: attendeeEmail || '',
         qr_code: qrCode,
@@ -101,14 +140,20 @@ export async function POST(request: Request) {
       });
 
       if (regErr) {
-        return NextResponse.json({ error: regErr.message }, { status: 500 });
+        console.error('Free registration insert error:', regErr);
+        return NextResponse.json({ error: 'Failed to create registration' }, { status: 500 });
       }
 
-      // Send confirmation email non-blocking for free tickets
+      // Insert into email outbox instead of fire-and-forget email sending
       try {
-        (async () => {
-          const { data: eventData } = await supabase.from('events').select('title, start_date, venue_name, city').eq('id', eventId).single();
-          await sendBookingConfirmationEmail({
+        const { data: eventData } = await supabase.from('events').select('title, start_date, venue_name, city').eq('id', eventId).single();
+        
+        await supabase.from('email_outbox').insert({
+          idempotency_key: `booking_confirmation_${regId}`,
+          recipient: attendeeEmail || '',
+          subject: `Your ticket for ${eventData?.title || 'Event'} is confirmed!`,
+          template_name: 'BookingConfirmation',
+          payload: {
             eventName: eventData?.title || 'Event',
             eventDate: eventData?.start_date ? new Date(eventData.start_date).toLocaleString() : 'TBA',
             eventVenue: eventData?.venue_name || eventData?.city || 'TBA',
@@ -117,26 +162,26 @@ export async function POST(request: Request) {
             ticketTypeName: ticketType?.name || 'General Admission',
             qrCodeUrl: qrCode,
             registrationId: regId,
-          });
-        })().catch(console.error);
+          }
+        });
       } catch (e) {
-        console.error('Failed to initiate confirmation email send for free ticket:', e);
+        console.error('Failed to queue confirmation email for free ticket:', e);
       }
 
       return NextResponse.json({ free: true, registrationId: regId, orderId: order.id });
     }
 
-    // 4. PAID tickets — create Razorpay order
+    // 3. PAID tickets — create Razorpay order
     const razorpay = new Razorpay({
       key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID!,
       key_secret: process.env.RAZORPAY_KEY_SECRET!,
     });
 
-    // Insert pending order first to get orderId as receipt
+    // Insert pending order to get a receipt ID before calling Razorpay
     const { data: pendingOrder, error: pendingErr } = await supabase
       .from('orders')
       .insert({
-        user_id: userId,
+        user_id: userId,                           // Authoritative from server session
         event_id: eventId,
         total_amount: totalAmount,
         status: 'pending',
@@ -145,7 +190,8 @@ export async function POST(request: Request) {
       .single();
 
     if (pendingErr || !pendingOrder) {
-      return NextResponse.json({ error: pendingErr?.message || 'Failed to create order' }, { status: 500 });
+      console.error('Pending order create error:', pendingErr);
+      return NextResponse.json({ error: 'Failed to create order' }, { status: 500 });
     }
 
     const rzpOrder = await razorpay.orders.create({
@@ -172,6 +218,6 @@ export async function POST(request: Request) {
     });
   } catch (err: any) {
     console.error('Order create error:', err);
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

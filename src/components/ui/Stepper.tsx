@@ -1,9 +1,10 @@
-import React, { useState, Children, useRef, useLayoutEffect, HTMLAttributes, ReactNode } from 'react';
+import React, { useState, useEffect, Children, useRef, useLayoutEffect, HTMLAttributes, ReactNode } from 'react';
 import { motion, AnimatePresence, Variants } from 'motion/react';
 
 interface StepperProps extends HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   initialStep?: number;
+  activeStep?: number;
   onStepChange?: (step: number) => void;
   onFinalStepCompleted?: () => void;
   stepCircleContainerClassName?: string;
@@ -37,6 +38,7 @@ export default function Stepper({
   nextButtonText = 'Continue',
   disableStepIndicators = false,
   renderStepIndicator,
+  activeStep,
   ...rest
 }: StepperProps) {
   const [currentStep, setCurrentStep] = useState<number>(initialStep);
@@ -45,6 +47,13 @@ export default function Stepper({
   const totalSteps = stepsArray.length;
   const isCompleted = currentStep > totalSteps;
   const isLastStep = currentStep === totalSteps;
+
+  useEffect(() => {
+    if (activeStep !== undefined && activeStep !== currentStep) {
+      setDirection(activeStep > currentStep ? 1 : -1);
+      setCurrentStep(activeStep);
+    }
+  }, [activeStep, currentStep]);
 
   const updateStep = (newStep: number) => {
     setCurrentStep(newStep);
@@ -76,12 +85,11 @@ export default function Stepper({
 
   return (
     <div
-      className="flex min-h-full flex-1 flex-col items-center justify-center p-4 sm:aspect-[4/3] md:aspect-[2/1]"
+      className={`flex min-h-full flex-1 flex-col p-4 w-full ${rest.className || ''}`}
       {...rest}
     >
       <div
-        className={`mx-auto w-full max-w-md rounded-4xl shadow-xl ${stepCircleContainerClassName}`}
-        style={{ border: '1px solid #222' }}
+        className={`mx-auto w-full rounded-2xl ${stepCircleContainerClassName}`}
       >
         <div className={`${stepContainerClassName} flex w-full items-center p-8`}>
           {stepsArray.map((_, index) => {

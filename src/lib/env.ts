@@ -23,7 +23,10 @@ const envSchema = z.object({
   
   UPSTASH_REDIS_REST_URL: z.string().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
-  
+
+  // QR ticket signing — required in production, minimum 32 characters for security
+  QR_SIGNING_SECRET: z.string().min(32, 'QR_SIGNING_SECRET must be at least 32 characters'),
+
   SENTRY_DSN: z.string().optional(),
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().optional(),
 });
@@ -47,6 +50,7 @@ const processEnv = {
   MSG91_AUTH_KEY: process.env.MSG91_AUTH_KEY,
   UPSTASH_REDIS_REST_URL: process.env.UPSTASH_REDIS_REST_URL,
   UPSTASH_REDIS_REST_TOKEN: process.env.UPSTASH_REDIS_REST_TOKEN,
+  QR_SIGNING_SECRET: process.env.QR_SIGNING_SECRET,
   SENTRY_DSN: process.env.SENTRY_DSN,
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
 };

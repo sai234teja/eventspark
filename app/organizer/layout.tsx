@@ -54,6 +54,17 @@ export default function OrganizerLayout({ children }: { children: React.ReactNod
         return;
       }
 
+      // Allow access to the registration page for standard users
+      if (pathname === '/organizer/register') {
+        if (profile.role === 'organizer' || profile.role === 'admin') {
+          // Already an organizer
+          router.replace('/organizer/dashboard');
+          return;
+        }
+        setLoading(false);
+        return;
+      }
+
       if (profile.role !== 'organizer' && profile.role !== 'admin') {
         router.replace('/dashboard');
         return;
@@ -124,6 +135,14 @@ export default function OrganizerLayout({ children }: { children: React.ReactNod
       </div>
     </aside>
   );
+
+  if (pathname === '/organizer/register') {
+    return (
+      <div className="min-h-screen bg-[#0A0A0F] text-white">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-[#0A0A0F] overflow-hidden text-white">

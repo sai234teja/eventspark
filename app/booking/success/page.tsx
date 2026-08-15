@@ -6,6 +6,7 @@ import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Loader2, Calendar, MapPin, Ticket, ArrowLeft, Download } from 'lucide-react';
+import { playSuccessChime, vibrateSuccess } from '@/utils/audio';
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -49,6 +50,12 @@ function SuccessContent() {
 
         setRegistration({ ...reg, order, ticketType, event });
         setLoading(false);
+        
+        // Play success audio and haptics when loaded!
+        setTimeout(() => {
+          playSuccessChime();
+          vibrateSuccess();
+        }, 100);
       });
   }, [registrationId]);
 
@@ -86,8 +93,8 @@ function SuccessContent() {
       {/* CSS checkmark animation styles */}
       <style dangerouslySetInnerHTML={{__html: `
         .checkmark {
-          width: 80px;
-          height: 80px;
+          width: 56px;
+          height: 56px;
           border-radius: 50%;
           display: block;
           stroke-width: 2;
@@ -95,9 +102,6 @@ function SuccessContent() {
           stroke-miterlimit: 10;
           box-shadow: inset 0px 0px 0px #22c55e;
           animation: fill .4s ease-in-out .4s forwards, scale .3s ease-in-out 0s both;
-          position: relative;
-          top: 5px;
-          right: 5px;
           margin: 0 auto;
         }
         .checkmark__circle {

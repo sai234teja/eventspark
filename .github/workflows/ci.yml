@@ -1,0 +1,63 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+        cache: 'npm'
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: TypeScript Gate
+      run: npx tsc --noEmit
+
+    - name: Lint Gate
+      run: npm run lint
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+
+    - name: Test Gate (E2E Smoke Tests)
+      run: npm run test
+      env:
+        # Mock environment variables to allow tests to run
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
+        NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock
+        # Do NOT include real secrets here
+
+    - name: Build Gate (Production Build)
+      run: npm run build
+      env:
+        # Build requires schema-validated environment variables
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
+        NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock
+        NEXT_PUBLIC_RAZORPAY_KEY_ID: rzp_test_mock
+        QR_SIGNING_SECRET: 0123456789abcdef0123456789abcdef
+        SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock
+        RAZORPAY_KEY_SECRET: mock_secret
+        RAZORPAY_WEBHOOK_SECRET: mock_secret
+        CRON_SECRET: mock_secret
+        # No actual production secrets should be committed or printed
+
+    - name: Vercel Deployment Note
+      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+      run: |
+        echo "CI Checks passed. Assuming Vercel is connected, Vercel will now automatically deploy the main branch."
+        # Note: If manual Vercel deployment is desired, Vercel CLI steps would be added here.

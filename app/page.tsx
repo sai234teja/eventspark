@@ -190,7 +190,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Featured Events</h2>
-              <p className="text-slate-600 dark:text-slate-400">Hand-picked events you don't want to miss.</p>
+              <p className="text-slate-600 dark:text-slate-400">Hand-picked events you don&apos;t want to miss.</p>
             </div>
             <Link href="/events" className="hidden md:flex items-center gap-1.5 text-[#6C47FF] font-semibold hover:underline group">
               View all events <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -64,7 +64,7 @@ export default function ReferralsPage() {
           {(!referrals || referrals.length === 0) ? (
             <div className="text-center py-12 text-slate-500 border border-dashed border-slate-700 rounded-lg">
               <Users className="w-8 h-8 mx-auto mb-3 text-slate-600" />
-              <p>You haven't referred anyone yet.</p>
+              <p>You haven&apos;t referred anyone yet.</p>
             </div>
           ) : (
             <div className="space-y-4">

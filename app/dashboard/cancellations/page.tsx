@@ -61,7 +61,7 @@ export default function CancellationsDashboardPage() {
                     </div>
                     <div>
                       <CardTitle className="text-white text-lg">{c.registrations?.events?.title || 'Unknown Event'}</CardTitle>
-                      <p className="text-sm text-slate-400 mt-1">Reason: "{c.reason}"</p>
+                      <p className="text-sm text-slate-400 mt-1">Reason: &quot;{c.reason}&quot;</p>
                     </div>
                   </div>
                   

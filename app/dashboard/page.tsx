@@ -229,7 +229,7 @@ export default async function DashboardOverview() {
                 <CalendarDays className="w-8 h-8 text-slate-600" />
               </div>
               <h3 className="text-lg font-bold text-white mb-2">No upcoming events</h3>
-              <p className="text-slate-400 mb-6 max-w-md mx-auto">You don't have any upcoming event registrations. Discover amazing events happening near you!</p>
+              <p className="text-slate-400 mb-6 max-w-md mx-auto">You don&apos;t have any upcoming event registrations. Discover amazing events happening near you!</p>
               <Link href="/events">
                 <button className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-bold py-2.5 px-6 rounded-lg text-sm transition-colors">
                   Explore Events

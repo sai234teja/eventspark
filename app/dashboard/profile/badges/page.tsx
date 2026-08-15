@@ -28,7 +28,7 @@ export default function BadgesPage() {
           <Card className="bg-slate-900/50 border-slate-800 backdrop-blur-xl col-span-full">
             <CardContent className="py-12 text-center text-slate-500">
               <Award className="w-8 h-8 mx-auto mb-3 text-slate-600" />
-              <p>You haven't earned any badges yet. Attend events to unlock achievements!</p>
+              <p>You haven&apos;t earned any badges yet. Attend events to unlock achievements!</p>
             </CardContent>
           </Card>
         ) : (

@@ -278,7 +278,7 @@ export default function TicketDetailPage() {
                 <li>Present this digital ticket (or printed copy) at the venue entrance.</li>
                 <li>QR code is valid for one-time admission scan only.</li>
                 <li>Please bring a valid photo identity proof matching the attendee name.</li>
-                <li>Tickets are non-refundable and subject to the organizer's venue policy.</li>
+                <li>Tickets are non-refundable and subject to the organizer&apos;s venue policy.</li>
               </ul>
             </div>
             </div>

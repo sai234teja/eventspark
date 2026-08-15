@@ -117,7 +117,7 @@ export default function Signup() {
               </div>
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Check your email</h2>
               <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
-                We've sent you a verification link. Please check your email to verify your account before logging in.
+                We&apos;ve sent you a verification link. Please check your email to verify your account before logging in.
               </p>
               <div className="pt-4">
                 <button 

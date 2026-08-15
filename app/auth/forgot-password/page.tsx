@@ -51,7 +51,7 @@ export default function ForgotPassword() {
         <div className="w-full max-w-md space-y-4 bg-white dark:bg-slate-900 p-8 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 text-center">
           <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Check your email</h2>
           <p className="text-slate-600 dark:text-slate-400">
-            We've sent you a link to reset your password. Please check your inbox.
+            We&apos;ve sent you a link to reset your password. Please check your inbox.
           </p>
           <div className="mt-4">
             <Link href="/auth/login" className="text-blue-600 hover:text-blue-500 font-medium">
@@ -69,7 +69,7 @@ export default function ForgotPassword() {
         <div className="text-center">
           <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">Reset Password</h2>
           <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-            Enter your email and we'll send you a link to reset your password.
+            Enter your email and we&apos;ll send you a link to reset your password.
           </p>
         </div>
 

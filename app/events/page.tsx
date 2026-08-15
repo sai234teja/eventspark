@@ -240,7 +240,7 @@ function EventsDiscoveryContent() {
                 </div>
                 <h3 className="text-xl font-bold text-slate-900 dark:text-white">No events found</h3>
                 <p className="text-slate-500 dark:text-slate-400 text-sm">
-                  We couldn't find any events matching your combination of filters. Try clearing them to start over.
+                  We couldn&apos;t find any events matching your combination of filters. Try clearing them to start over.
                 </p>
                 <div className="pt-2">
                   <Button 

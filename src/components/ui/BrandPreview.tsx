@@ -108,7 +108,7 @@ export const BrandPreview = ({
       <div className="relative z-10 p-6 space-y-6">
         <div>
           <h2 className="text-2xl font-bold mb-1">Upcoming Events</h2>
-          <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Manage and track your organization's events.</p>
+          <p className={`${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Manage and track your organization&apos;s events.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

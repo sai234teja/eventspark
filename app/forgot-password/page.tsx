@@ -80,7 +80,7 @@ export default function ForgotPassword() {
               </motion.div>
               <h2 className="text-xl font-semibold text-white">Check your email</h2>
               <p className="text-slate-400 text-sm">
-                We've sent password reset instructions to <strong>{email}</strong>.
+                We&apos;ve sent password reset instructions to <strong>{email}</strong>.
               </p>
               <div className="pt-4">
                 <Link href="/login">
@@ -95,7 +95,7 @@ export default function ForgotPassword() {
               <CardHeader>
                 <CardTitle className="text-white">Reset Password</CardTitle>
                 <CardDescription className="text-slate-400">
-                  Enter your email and we'll send you a recovery link.
+                  Enter your email and we&apos;ll send you a recovery link.
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleReset}>

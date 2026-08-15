@@ -41,7 +41,7 @@ export default function WishlistPage() {
           <Card className="bg-slate-900 border-slate-800 border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Calendar className="h-12 w-12 text-slate-600 mb-4" />
-              <p className="text-slate-400">You haven't saved any events yet.</p>
+              <p className="text-slate-400">You haven&apos;t saved any events yet.</p>
               <Link href="/events" className="mt-4 text-emerald-500 hover:text-emerald-400">Discover Events</Link>
             </CardContent>
           </Card>
@@ -76,7 +76,7 @@ export default function WishlistPage() {
           <Card className="bg-slate-900 border-slate-800 border-dashed">
             <CardContent className="flex flex-col items-center justify-center py-12">
               <Building2 className="h-12 w-12 text-slate-600 mb-4" />
-              <p className="text-slate-400">You haven't followed any organizers yet.</p>
+              <p className="text-slate-400">You haven&apos;t followed any organizers yet.</p>
             </CardContent>
           </Card>
         ) : (

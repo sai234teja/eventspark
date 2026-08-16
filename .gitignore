@@ -29,3 +29,15 @@ dist-ssr
 
 .vercel
 .env*
+
+# Local production backups
+production_schema_backup.sql
+production_data_backup.sql
+
+# Test/build artifacts
+playwright-report/
+test-results/
+tsconfig.tsbuildinfo
+
+# Supabase CLI local temp
+supabase/.temp/

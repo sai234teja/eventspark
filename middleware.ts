@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from './supabase/middleware'
-import { createServerClient } from '@supabase/ssr'
 
 
 export async function middleware(request: NextRequest) {
@@ -12,27 +11,8 @@ export async function middleware(request: NextRequest) {
 
   const isAuthRoute = pathname.startsWith('/auth/')
 
-  // updateSession refreshes the session and returns response with cookies
-  const response = await updateSession(request)
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options)
-          })
-        },
-      },
-    }
-  )
-
-  const { data: { user } } = await supabase.auth.getUser()
+  // updateSession refreshes the session and returns response with cookies, user, and role
+  const { response, user, role } = await updateSession(request)
 
   // Unauthenticated user trying to access protected route
   if (!user && isProtectedRoute) {
@@ -47,13 +27,6 @@ export async function middleware(request: NextRequest) {
 
   // Authenticated user trying to access auth pages — redirect by role
   if (user && isAuthRoute) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    const role = profile?.role || 'user'
     const dest = role === 'admin' ? '/admin' : role === 'organizer' ? '/organizer' : '/dashboard'
     
     const redirectResponse = NextResponse.redirect(new URL(dest, request.url))
@@ -65,13 +38,6 @@ export async function middleware(request: NextRequest) {
 
   // Role enforcement on protected routes
   if (user && isProtectedRoute) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    const role = profile?.role || 'user'
 
     if (pathname.startsWith('/admin') && role !== 'admin') {
       const redirectResponse = NextResponse.redirect(new URL('/dashboard', request.url))

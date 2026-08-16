@@ -28,7 +28,19 @@ export async function updateSession(request: NextRequest) {
   )
 
   // Refresh session if expired
-  await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
 
-  return supabaseResponse
+  let role = 'user'
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+    if (profile?.role) {
+      role = profile.role
+    }
+  }
+
+  return { response: supabaseResponse, user, role }
 }

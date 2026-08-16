@@ -11,14 +11,14 @@ test.describe('EventSpark Smoke Tests', () => {
   test('2. Authentication page loads', async ({ page }) => {
     await page.goto('/login');
     // Expect the login form to be visible
-    await expect(page.locator('form')).toBeVisible();
-    await expect(page.getByRole('button', { name: /Sign In|Log In/i })).toBeVisible();
+    await expect(page.locator('form').filter({ hasText: 'Password' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Sign In', exact: true }).or(page.getByRole('button', { name: 'Log In', exact: true }))).toBeVisible();
   });
 
   test('3. Event discovery loads', async ({ page }) => {
     await page.goto('/events');
     // Search or events list should be visible
-    await expect(page.getByPlaceholder(/Search/i).first()).toBeVisible();
+    await expect(page.getByPlaceholder(/Keywords/i).first()).toBeVisible();
   });
 
   test('4. Unauthorized organizer/admin access is rejected', async ({ page }) => {

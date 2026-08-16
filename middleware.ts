@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { updateSession } from '../supabase/middleware'
+import { updateSession } from './supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
 import { env } from '@/lib/env'
 

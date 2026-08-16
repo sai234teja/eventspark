@@ -29,18 +29,6 @@ jobs:
     - name: Lint Gate
       run: npm run lint
 
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-
-    - name: Test Gate (E2E Smoke Tests)
-      run: npm run test
-      env:
-        # Mock environment variables to allow tests to run
-        NEXT_PUBLIC_APP_URL: http://localhost:3000
-        NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
-        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock
-        # Do NOT include real secrets here
-
     - name: Build Gate (Production Build)
       run: npm run build
       env:
@@ -55,6 +43,18 @@ jobs:
         RAZORPAY_WEBHOOK_SECRET: mock_secret
         CRON_SECRET: mock_secret
         # No actual production secrets should be committed or printed
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+
+    - name: Test Gate (E2E Smoke Tests)
+      run: npm run test
+      env:
+        # Mock environment variables to allow tests to run
+        NEXT_PUBLIC_APP_URL: http://localhost:3000
+        NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.mock
+        # Do NOT include real secrets here
 
     - name: Vercel Deployment Note
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'

@@ -268,15 +268,15 @@ function BookingContent({ eventId }: { eventId: string }) {
       {processing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
           <Hyperspeed effectOptions={hyperspeedPreset} className="absolute inset-0 z-0 opacity-80" />
-          <div className="z-10 bg-black/40 backdrop-blur-md px-10 py-8 rounded-2xl flex flex-col items-center gap-4 text-white border border-white/10 shadow-2xl">
+          <div className="z-10 bg-black/40 backdrop-blur-md px-6 sm:px-10 py-8 mx-4 sm:mx-0 text-center rounded-2xl flex flex-col items-center gap-4 text-white border border-white/10 shadow-2xl">
             <Loader2 className="h-10 w-10 animate-spin text-[#FF6B6B]" />
-            <h2 className="text-2xl font-bold tracking-tight">Securing Checkout...</h2>
-            <p className="text-sm font-medium text-slate-300">Initiating Hyperspeed Payment Tunnel</p>
+            <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Securing Checkout...</h2>
+            <p className="text-xs sm:text-sm font-medium text-slate-300">Initiating Hyperspeed Payment Tunnel</p>
           </div>
         </div>
       )}
-      <main className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-905 dark:text-white py-12 px-6">
-        <div className="max-w-5xl mx-auto space-y-8">
+      <main className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-905 dark:text-white py-6 sm:py-12 px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         
         {/* Nav header */}
         <div className="flex items-center justify-between">
@@ -298,10 +298,10 @@ function BookingContent({ eventId }: { eventId: string }) {
 
         <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Complete Booking</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
           
           {/* Left Column: Form Details */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-6 order-2 lg:order-1">
             <div className="bg-white dark:bg-[#111118] rounded-[12px] border border-slate-200 dark:border-slate-800 p-2 shadow-sm">
               <Stepper
                 initialStep={1}
@@ -442,7 +442,7 @@ function BookingContent({ eventId }: { eventId: string }) {
           </div>
 
           {/* Right Column: Order Summary Sticky Card */}
-          <div className="space-y-6 lg:sticky lg:top-28 self-start">
+          <div className="space-y-6 lg:sticky lg:top-28 self-start order-1 lg:order-2">
             <div className="bg-white dark:bg-[#111118] rounded-[12px] border border-slate-200 dark:border-slate-800 p-6 shadow-sm space-y-6">
               <h2 className="text-base font-bold text-slate-900 dark:text-white pb-3 border-b border-slate-100 dark:border-slate-800">
                 Order Summary

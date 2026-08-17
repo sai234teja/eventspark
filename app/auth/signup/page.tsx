@@ -92,7 +92,7 @@ export default function Signup() {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0A0A0F] p-6 transition-colors duration-300 relative overflow-hidden">
+      <main className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-[#0A0A0F] p-6 transition-colors duration-300 relative overflow-hidden">
         {/* LightPillar Background */}
         <LightPillar
           topColor="#6C47FF"
@@ -122,7 +122,7 @@ export default function Signup() {
               <div className="pt-4">
                 <button 
                   onClick={() => setIsTearing(true)}
-                  className="text-[#6C47FF] hover:underline font-semibold flex items-center justify-center gap-1.5 text-sm mx-auto"
+                  className="text-[#6C47FF] dark:text-indigo-400 hover:underline font-semibold flex items-center justify-center gap-1.5 text-sm mx-auto"
                 >
                   <ArrowLeft className="w-4 h-4" /> Return to login
                 </button>
@@ -130,12 +130,12 @@ export default function Signup() {
             </div>
           </TearableCard>
         </div>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300 relative overflow-hidden">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300 relative overflow-hidden">
       {/* LightPillar Background */}
       <LightPillar
         topColor="#6C47FF"
@@ -171,7 +171,7 @@ export default function Signup() {
 
           <form className="space-y-4" onSubmit={handleSubmit(onSubmit)} method="post">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Full Name</label>
               <div className="relative">
                 <User className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                 <input
@@ -187,7 +187,7 @@ export default function Signup() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                 <input
@@ -203,7 +203,7 @@ export default function Signup() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Password</label>
               <div className="relative">
                 <KeyRound className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                 <input
@@ -219,7 +219,7 @@ export default function Signup() {
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">I want to...</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2 block">I want to...</label>
               <div className="flex items-center gap-3">
                 <button
                   type="button"
@@ -278,7 +278,7 @@ export default function Signup() {
           {/* Social Sign In Divider */}
           <div className="relative my-4 flex items-center">
             <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
-            <span className="flex-shrink mx-4 text-slate-450 dark:text-slate-500 text-xs font-bold uppercase tracking-wider">or sign up with</span>
+            <span className="flex-shrink mx-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">or sign up with</span>
             <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
           </div>
 
@@ -307,12 +307,12 @@ export default function Signup() {
         {/* Footer link */}
         <p className="text-center text-xs text-slate-500">
           Already have an account?{' '}
-          <Link href="/auth/login" className="text-[#6C47FF] hover:underline font-semibold">
+          <Link href="/auth/login" className="text-[#6C47FF] dark:text-indigo-400 hover:underline font-semibold">
             Sign in
           </Link>
         </p>
 
       </div>
-    </div>
+    </main>
   );
 }

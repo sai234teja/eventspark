@@ -67,6 +67,7 @@ export function AIChatWidget() {
     <>
       {/* Floating Action Button */}
       <button
+        aria-label="Open Chat"
         onClick={() => setIsOpen(true)}
         className={`fixed bottom-6 right-6 p-4 bg-[#6C47FF] text-white rounded-full shadow-lg shadow-[#6C47FF]/25 hover:scale-105 transition-all z-50 flex items-center justify-center ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'}`}
       >
@@ -83,11 +84,12 @@ export function AIChatWidget() {
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="font-bold text-sm">Sparky AI</h3>
+              <h2 className="font-bold text-sm">Sparky AI</h2>
               <p className="text-[10px] text-white/80 uppercase tracking-wider font-bold">Event Assistant</p>
             </div>
           </div>
           <button 
+            aria-label="Close Chat"
             onClick={() => setIsOpen(false)}
             className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
           >
@@ -131,6 +133,7 @@ export function AIChatWidget() {
               className="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-900 border border-transparent focus:border-[#6C47FF] focus:bg-white dark:focus:bg-slate-950 rounded-full text-sm text-slate-900 dark:text-white outline-none transition-all"
             />
             <Button 
+              aria-label="Send Message"
               type="submit"
               disabled={isLoading || !input.trim()}
               className="w-10 h-10 rounded-full bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white p-0 shrink-0 flex items-center justify-center"

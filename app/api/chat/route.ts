@@ -1,30 +1,35 @@
 import { NextResponse } from 'next/server';
+import { GoogleGenAI } from '@google/genai';
 
-// This is a mocked AI endpoint for demonstration purposes.
-// In a real implementation, you would wire this up to the OpenAI or Anthropic API using the Vercel AI SDK.
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+
+const SYSTEM_PROMPT = `You are Sparky, the friendly AI assistant for EventSpark, a modern real-time event management platform. 
+Your goal is to help users find events, check prices, or manage their organizer dashboard.
+Keep your answers helpful, concise, and friendly. Use emojis occasionally.
+When users ask about events in general, tell them they can browse community events or premium paid experiences.
+When users ask about organizing, tell them they can create events easily from the Organizer Dashboard.
+`;
+
 export async function POST(req: Request) {
   try {
     const { messages } = await req.json();
     
-    // Simulate network delay for "thinking"
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    // Map existing messages to Gemini format
+    const contents = messages.map((m: any) => ({
+      role: m.role === 'user' ? 'user' : 'model',
+      parts: [{ text: m.content }]
+    }));
 
-    // Simple mocked responses based on keywords
-    const lastMessage = messages[messages.length - 1].content.toLowerCase();
-    
-    let reply = "I'm your EventSpark AI assistant! I'm still learning, but I can help you discover events, check ticket prices, or manage your organizer dashboard.";
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        { role: 'user', parts: [{ text: SYSTEM_PROMPT }] },
+        { role: 'model', parts: [{ text: 'Understood. I am Sparky, the EventSpark assistant.' }] },
+        ...contents
+      ],
+    });
 
-    if (lastMessage.includes('tech') || lastMessage.includes('hyderabad')) {
-      reply = "There's a massive Tech Summit happening in Hyderabad on August 12th, 2026! It's one of our most popular events. Would you like me to send you the link to book tickets?";
-    } else if (lastMessage.includes('price') || lastMessage.includes('cost') || lastMessage.includes('free')) {
-      reply = "Event prices vary! We have completely free community events as well as premium paid experiences. You can easily see the price on any event card, or use the 'Free' filter on the Browse Events page.";
-    } else if (lastMessage.includes('create') || lastMessage.includes('organize')) {
-      reply = "Creating an event is super easy! Just head to your Organizer Dashboard and click 'Create Event'. You can set up multiple ticket tiers, beautiful banners, and track your sales all in one place.";
-    } else if (lastMessage.includes('wallet') || lastMessage.includes('money')) {
-      reply = "You can manage your funds directly from your Wallet in the dashboard. You can add money securely using our Razorpay integration!";
-    }
-
-    return NextResponse.json({ message: reply });
+    return NextResponse.json({ message: response.text });
     
   } catch (error) {
     console.error('Chat API Error:', error);

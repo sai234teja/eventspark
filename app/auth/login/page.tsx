@@ -71,7 +71,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex transition-colors duration-300">
+    <main className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex transition-colors duration-300">
       
       {/* Left panel (brand side) - hidden on mobile */}
       <div className="hidden md:flex flex-col flex-1 relative bg-gradient-to-br from-[#6C47FF]/5 to-[#FF6B6B]/5 border-r border-slate-200 dark:border-slate-800 overflow-hidden items-center justify-center p-10">
@@ -149,7 +149,7 @@ export default function LoginPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
+              <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email Address</label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
                 <input
@@ -167,8 +167,8 @@ export default function LoginPage() {
 
             <div className="space-y-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
-                <Link href="/auth/forgot-password" className="text-xs text-[#6C47FF] hover:underline font-semibold">
+                <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Password</label>
+                <Link href="/auth/forgot-password" className="text-xs text-[#6C47FF] dark:text-indigo-400 hover:underline font-semibold">
                   Forgot password?
                 </Link>
               </div>
@@ -206,7 +206,7 @@ export default function LoginPage() {
           {/* Social Sign In Divider */}
           <div className="relative my-4 flex items-center">
             <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
-            <span className="flex-shrink mx-4 text-slate-450 dark:text-slate-500 text-xs font-bold uppercase tracking-wider">or continue with</span>
+            <span className="flex-shrink mx-4 text-slate-500 dark:text-slate-400 text-xs font-bold uppercase tracking-wider">or continue with</span>
             <div className="flex-grow border-t border-slate-200 dark:border-slate-800" />
           </div>
 
@@ -235,13 +235,13 @@ export default function LoginPage() {
         {/* Footer link */}
         <p className="text-center text-xs text-slate-500">
           Don&apos;t have an account?{' '}
-          <Link href="/auth/signup" className="text-[#6C47FF] hover:underline font-semibold">
+          <Link href="/auth/signup" className="text-[#6C47FF] dark:text-indigo-400 hover:underline font-semibold">
             Create an account
           </Link>
         </p>
 
       </div>
     </div>
-    </div>
+    </main>
   );
 }

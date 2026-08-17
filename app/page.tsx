@@ -163,7 +163,7 @@ export default function Home() {
               variants={{
                 visible: { transition: { staggerChildren: 0.1, delayChildren: 0.4 } }
               }}
-              className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B]"
+              className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B] inline-block w-full break-words hyphens-none"
             >
               {["Best", "Experiences"].map((word, i) => (
                 <motion.span
@@ -196,7 +196,7 @@ export default function Home() {
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 1 }}
             onSubmit={handleSearch} 
-            className="mt-10 bg-white dark:bg-[#111118] p-2 md:p-3 rounded-[24px] md:rounded-full shadow-lg hover:shadow-xl dark:shadow-[#6C47FF]/5 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center gap-2 max-w-2xl mx-auto transition-all duration-300"
+            className="mt-10 bg-white dark:bg-[#111118] p-2 md:p-3 rounded-[24px] md:rounded-full shadow-lg hover:shadow-xl dark:shadow-[#6C47FF]/5 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center gap-2 w-full max-w-2xl mx-auto overflow-hidden px-4 transition-all duration-300"
           >
             <div className="flex-1 flex items-center px-4 w-full md:w-auto border-b md:border-b-0 md:border-r border-slate-200 dark:border-slate-800 pb-2 md:pb-0">
               <Search className="w-5 h-5 text-slate-400 mr-2.5 shrink-0" />

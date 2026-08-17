@@ -90,7 +90,6 @@
 
 .nav-items {
   position: relative;
-  display: flex;
   gap: 4px;
   z-index: 3;
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, ArrowRight } from "lucide-react";
 
@@ -57,13 +58,14 @@ export default function BlogPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {blogPosts.map((post) => (
           <article key={post.id} className="group flex flex-col space-y-4 rounded-xl border bg-card p-4 transition-colors hover:bg-muted/50">
-            <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted">
+            <div className="aspect-video w-full overflow-hidden rounded-lg bg-muted relative">
               {/* Using standard img tag for simplicity, ideally next/image */}
-              <img 
+              <Image 
                 src={post.imageUrl} 
                 alt={post.title} 
-                className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                loading="lazy"
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
             

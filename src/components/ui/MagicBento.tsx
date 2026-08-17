@@ -192,7 +192,7 @@ const ParticleCard: React.FC<{
 
         gsap.to(clone, {
           opacity: 0.3,
-          duration: 1.5,
+          duration: 0.4,
           ease: 'power2.inOut',
           repeat: -1,
           yoyo: true
@@ -319,7 +319,7 @@ const ParticleCard: React.FC<{
         {
           scale: 1,
           opacity: 0,
-          duration: 0.8,
+          duration: 0.3,
           ease: 'power2.out',
           onComplete: () => ripple.remove()
         }
@@ -823,7 +823,7 @@ const MagicBento: React.FC<BentoProps> = ({
                       {
                         scale: 1,
                         opacity: 0,
-                        duration: 0.8,
+                        duration: 0.3,
                         ease: 'power2.out',
                         onComplete: () => ripple.remove()
                       }

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar, MapPin, Users } from "lucide-react";
+import Image from "next/image";
 
 interface BrandPreviewProps {
   primaryColor?: string;
@@ -90,7 +91,7 @@ export const BrandPreview = ({
       <div className={`relative z-10 h-14 border-b flex items-center px-4 justify-between ${isDark ? 'bg-slate-900/80 backdrop-blur-sm border-slate-800' : 'bg-white/80 backdrop-blur-sm border-slate-200'}`}>
         <div className="flex items-center space-x-2">
           {logoUrl ? (
-            <img src={logoUrl} alt="Logo" className="h-8 max-w-[120px] object-contain" />
+            <Image src={logoUrl} alt="Logo" width={120} height={32} className="h-8 w-auto object-contain" />
           ) : (
             <div className="h-8 w-8 rounded bg-primary/20 flex items-center justify-center text-primary font-bold">
               ES

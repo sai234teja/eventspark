@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { createBrowserClient } from "@supabase/ssr";
 import { Search, MapPin, Compass, ShieldCheck, Award, Sparkles, ArrowRight, Github, Linkedin, Twitter } from "lucide-react";
-import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion, useInView, useMotionValue, useTransform, animate, useReducedMotion } from "framer-motion";
 
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { Button } from "@/components/ui/button";
@@ -43,6 +43,7 @@ export default function Home() {
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const prefersReducedMotion = useReducedMotion();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [searchCity, setSearchCity] = useState("");
@@ -112,7 +113,7 @@ export default function Home() {
           />
           <motion.div 
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-tr from-[#6C47FF]/30 to-[#FF6B6B]/30 rounded-full blur-[120px]"
-            animate={{ scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
+            animate={prefersReducedMotion ? {} : { scale: [1, 1.2, 1], rotate: [0, 90, 0] }}
             transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
           />
         </div>
@@ -121,7 +122,7 @@ export default function Home() {
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, staggerChildren: 0.1 }}
+          transition={{ duration: 0.3, staggerChildren: 0.1 }}
           className="max-w-4xl mx-auto text-center space-y-8 relative z-10"
         >
           <motion.div 
@@ -148,7 +149,7 @@ export default function Home() {
                   key={i}
                   variants={{
                     hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
                   }}
                   className="inline-block mr-3"
                 >
@@ -171,7 +172,7 @@ export default function Home() {
                   key={i}
                   variants={{
                     hidden: { opacity: 0, y: 20 },
-                    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
+                    visible: { opacity: 1, y: 0, transition: { duration: 0.3 } }
                   }}
                   className="inline-block mr-3"
                 >
@@ -186,7 +187,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.8 }}
+            transition={{ duration: 0.3, delay: 0.8 }}
             className="text-lg md:text-xl text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed"
           >
             Find and book tickets for the best tech conferences, music festivals, food meetups, and workshops happening in your city.
@@ -196,7 +197,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 1 }}
+            transition={{ duration: 0.3, delay: 1 }}
             onSubmit={handleSearch} 
             className="mt-10 bg-white dark:bg-[#111118] p-2 md:p-3 rounded-[24px] md:rounded-full shadow-lg hover:shadow-xl dark:shadow-[#6C47FF]/5 border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center gap-2 w-full max-w-2xl mx-auto overflow-hidden px-4 transition-all duration-300"
           >
@@ -229,7 +230,7 @@ export default function Home() {
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 1.2 }}
+            transition={{ duration: 0.3, delay: 1.2 }}
             className="pt-8 flex flex-wrap justify-center items-center gap-8 md:gap-12 text-slate-400 dark:text-slate-500 text-sm font-semibold"
           >
             <div className="flex items-center gap-2">
@@ -273,7 +274,7 @@ export default function Home() {
                   initial={{ opacity: 0, y: 30 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: i * 0.1 }}
+                  transition={{ duration: 0.3, delay: i * 0.1 }}
                   className="w-[85vw] sm:w-[350px] md:w-auto shrink-0 snap-start snap-always"
                 >
                   <EventCard event={event} />
@@ -323,7 +324,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+                transition={{ duration: 0.3, delay: i * 0.1 }}
               >
                 <Link href={`/events?category=${cat.slug}`}>
                   <div className={`p-6 rounded-[12px] bg-white dark:bg-[#111118] border border-slate-200/80 dark:border-slate-800 shadow-sm hover:shadow-md hover:scale-105 ${cat.border} transition-all duration-300 group flex flex-col items-center gap-3.5 cursor-pointer`}>
@@ -363,7 +364,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
+                transition={{ duration: 0.3, delay: i * 0.15 }}
                 className="space-y-5 relative group"
               >
                 <div className={`w-18 h-18 mx-auto ${step.bg} rounded-full flex items-center justify-center ${step.text} border ${step.border} font-extrabold text-xl shadow-md group-hover:-translate-y-2 group-hover:shadow-lg transition-all duration-300 relative`}>
@@ -371,7 +372,7 @@ export default function Home() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     whileInView={{ scale: 1.5, opacity: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 1.5, repeat: 0 }}
+                    transition={{ duration: 0.4, repeat: 0 }}
                     className={`absolute inset-0 rounded-full border-2 border-current opacity-20`}
                   />
                   {step.num}

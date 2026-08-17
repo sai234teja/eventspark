@@ -275,8 +275,8 @@ function EventsDiscoveryContent() {
             </Card>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {events.map((event: any) => (
-                <EventCard key={event.id} event={event} />
+              {events.map((event: any, i: number) => (
+                <EventCard key={event.id} event={event} priority={i < 4} />
               ))}
               {isLoading && events.length === 0 && [1, 2, 3, 4, 5, 6].map(i => (
                 <div key={i} className="h-[360px] bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 rounded-[12px] animate-pulse"></div>

@@ -8,6 +8,7 @@ import { TenantProvider } from '@/contexts/TenantContext';
 import { ReactQueryProvider } from "@/lib/react-query/QueryProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { AIChatWidget } from "@/components/shared/AIChatWidget";
+import NextTopLoader from 'nextjs-toploader';
 
 export const metadata: Metadata = {
   title: 'EventSpark',
@@ -46,6 +47,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <TenantProvider>
               <TooltipProvider>
                 <ThemeProvider>
+                  <NextTopLoader color="#6C47FF" showSpinner={false} />
                   <Toaster />
                   <Sonner />
                   {children}

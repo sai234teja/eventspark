@@ -4,7 +4,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, MapPin, Users } from "lucide-react";
 
-export function EventCard({ event, onClick }: { event: any, onClick?: () => void }) {
+export function EventCard({ event, onClick, priority = false }: { event: any, onClick?: () => void, priority?: boolean }) {
   const CardContentWrap = (
     <Card className="group h-full overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px] shadow-sm hover:-translate-y-1 hover:shadow-lg cursor-pointer transition-all duration-200 ease-out">
       <div className="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
@@ -14,6 +14,7 @@ export function EventCard({ event, onClick }: { event: any, onClick?: () => void
           fill
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          priority={priority}
         />
         {event.status === 'completed' && (
            <div className="absolute top-2 right-2">
@@ -32,7 +33,7 @@ export function EventCard({ event, onClick }: { event: any, onClick?: () => void
         </div>
         <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug line-clamp-2 min-h-[2.75rem] group-hover:text-indigo-500 transition-colors">{event.title}</h3>
         
-        <div className="space-y-1.5 mt-2 text-xs text-slate-500 dark:text-slate-400">
+        <div className="space-y-1.5 mt-2 text-sm text-slate-500 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <Calendar className="h-3.5 w-3.5 text-indigo-500 shrink-0" />
             <span>{event.start_date ? new Date(event.start_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : event.date}</span>

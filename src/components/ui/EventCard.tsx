@@ -6,13 +6,13 @@ import { Calendar, MapPin, Users } from "lucide-react";
 
 export function EventCard({ event, onClick }: { event: any, onClick?: () => void }) {
   const CardContentWrap = (
-    <Card className="h-full overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px] shadow-sm hover-lift cursor-pointer transition-all duration-300">
+    <Card className="group h-full overflow-hidden border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-[12px] shadow-sm hover:-translate-y-1 hover:shadow-lg cursor-pointer transition-all duration-200 ease-out">
       <div className="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
         <Image 
           src={event.banner_url || "https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=800&q=80"} 
           alt={event.title}
           fill
-          className="object-cover transition-transform duration-500 hover:scale-105"
+          className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
         {event.status === 'completed' && (

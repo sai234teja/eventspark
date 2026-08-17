@@ -12,6 +12,29 @@ import { AIChatWidget } from "@/components/shared/AIChatWidget";
 export const metadata: Metadata = {
   title: 'EventSpark',
   description: 'Real‑time event management platform',
+  openGraph: {
+    title: 'EventSpark',
+    description: 'Real‑time event management platform',
+    url: 'https://eventspark-flame.vercel.app',
+    siteName: 'EventSpark',
+    images: [
+      {
+        url: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80',
+        width: 1200,
+        height: 630,
+        alt: 'EventSpark',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'EventSpark',
+    description: 'Real‑time event management platform',
+    creator: '@eventspark',
+    images: ['https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=1200&q=80'],
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

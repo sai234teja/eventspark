@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, MapPin, Search, Filter, Loader2, CalendarRange, Trash2, Sun, Moon } from "lucide-react";
+import { Calendar, MapPin, Search, Filter, Loader2, CalendarRange, Trash2, Sun, Moon, SlidersHorizontal, ChevronDown } from "lucide-react";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useSearch } from "@/hooks/useSearch";
 import { EventCard } from "@/components/ui/EventCard";
@@ -37,6 +37,7 @@ function EventsDiscoveryContent() {
   const [page, setPage] = useState(1);
   const [isFree, setIsFree] = useState<boolean | undefined>();
   const [hasAvailableSeats, setHasAvailableSeats] = useState<boolean | undefined>();
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
 
   // Simple debounce inline instead of hook for brevity
   const [debouncedSearch, setDebouncedSearch] = useState(searchParams.get('q') || "");
@@ -103,16 +104,27 @@ function EventsDiscoveryContent() {
         </div>
       </nav>
 
-      <div className="max-w-7xl mx-auto px-6 py-10 flex flex-col lg:flex-row gap-10">
+      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 md:gap-10 items-start">
         
         {/* Filters Sidebar */}
-        <aside className="w-full lg:w-64 shrink-0 space-y-6 lg:sticky lg:top-28 self-start">
-          <div className="bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 rounded-[12px] p-6 shadow-sm space-y-6">
-            <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
-              <Filter className="h-4.5 w-4.5 text-[#6C47FF]" /> Filter Events
+        <aside className="w-full shrink-0 space-y-6 sticky top-24 self-start z-10">
+          <div className="bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 rounded-[12px] p-6 shadow-sm flex flex-col">
+            
+            <button 
+              className="md:hidden flex items-center justify-between w-full pb-3 border-b border-slate-200 dark:border-slate-800"
+              onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
+            >
+              <div className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
+                <SlidersHorizontal className="h-4.5 w-4.5 text-[#6C47FF]" /> Filters
+              </div>
+              <ChevronDown className={`w-5 h-5 text-slate-500 transition-transform duration-300 ${isMobileFiltersOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            <h2 className="hidden md:flex text-base font-bold text-slate-900 dark:text-white items-center gap-2 pb-3 border-b border-slate-200 dark:border-slate-800">
+              <SlidersHorizontal className="h-4.5 w-4.5 text-[#6C47FF]" /> Filter Events
             </h2>
             
-            <div className="space-y-5">
+            <div className={`space-y-5 pt-4 md:pt-6 md:block overflow-hidden transition-all duration-300 ${isMobileFiltersOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 md:max-h-none md:opacity-100'}`}>
               {/* Search input */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Search</label>

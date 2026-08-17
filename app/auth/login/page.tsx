@@ -71,31 +71,72 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex items-center justify-center p-6 transition-colors duration-300 relative overflow-hidden">
-      {/* LightPillar Background */}
-      <LightPillar
-        topColor="#6C47FF"
-        bottomColor="#FF9FFC"
-        intensity={1.2}
-        rotationSpeed={0.5}
-        interactive={true}
-        quality="high"
-        className="z-0 pointer-events-none opacity-60"
-        mixBlendMode="normal"
-      />
-
-      <div className="w-full max-w-[440px] space-y-6 relative z-10">
-        
-        {/* Branding header */}
-        <div className="text-center space-y-2">
-          <div className="flex justify-center mb-2">
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white flex transition-colors duration-300">
+      
+      {/* Left panel (brand side) - hidden on mobile */}
+      <div className="hidden md:flex flex-col flex-1 relative bg-gradient-to-br from-[#6C47FF]/5 to-[#FF6B6B]/5 border-r border-slate-200 dark:border-slate-800 overflow-hidden items-center justify-center p-10">
+        <LightPillar
+          topColor="#6C47FF"
+          bottomColor="#FF9FFC"
+          intensity={1.2}
+          rotationSpeed={0.5}
+          interactive={true}
+          quality="high"
+          className="absolute inset-0 z-0 pointer-events-none opacity-60"
+          mixBlendMode="normal"
+        />
+        <div className="relative z-10 text-center max-w-md space-y-6">
+          <div className="flex justify-center mb-6">
             <BrandLogo />
           </div>
-          <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Welcome back</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            Enter your credentials to access your EventSpark account
-          </p>
+          <h2 className="text-4xl font-extrabold leading-tight">Your next great experience awaits</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-lg">Join the community of thousands of attendees and organizers.</p>
+          
+          <div className="bg-white/60 dark:bg-[#111118]/60 backdrop-blur-xl border border-white/20 dark:border-slate-800/50 p-4 rounded-[16px] shadow-xl rotate-[-2deg] hover:rotate-0 transition-transform duration-300 mx-auto w-3/4">
+            <div className="h-32 bg-slate-200 dark:bg-slate-800/80 rounded-lg mb-4 animate-pulse"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 w-3/4 rounded mb-2"></div>
+            <div className="h-3 bg-slate-200 dark:bg-slate-800 w-1/2 rounded"></div>
+          </div>
         </div>
+      </div>
+
+      {/* Right panel (form side) */}
+      <div className="flex-1 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        
+        {/* Mobile-only background */}
+        <div className="md:hidden absolute inset-0">
+          <LightPillar
+            topColor="#6C47FF"
+            bottomColor="#FF9FFC"
+            intensity={1.0}
+            rotationSpeed={0.5}
+            interactive={false}
+            quality="low"
+            className="z-0 pointer-events-none opacity-40"
+            mixBlendMode="normal"
+          />
+        </div>
+
+        <div className="w-full max-w-[440px] space-y-6 relative z-10">
+          
+          {/* Mobile Branding header */}
+          <div className="md:hidden text-center space-y-2">
+            <div className="flex justify-center mb-2">
+              <BrandLogo />
+            </div>
+            <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white">Welcome back</h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Enter your credentials to access your EventSpark account
+            </p>
+          </div>
+
+          {/* Desktop Branding header */}
+          <div className="hidden md:block space-y-2">
+            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white">Welcome back</h1>
+            <p className="text-slate-500 dark:text-slate-400">
+              Enter your credentials to access your account
+            </p>
+          </div>
 
         {/* Card container */}
         <div className="bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 p-8 rounded-[12px] shadow-sm space-y-6">
@@ -200,6 +241,7 @@ export default function LoginPage() {
         </p>
 
       </div>
+    </div>
     </div>
   );
 }

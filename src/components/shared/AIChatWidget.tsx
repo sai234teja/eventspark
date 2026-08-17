@@ -16,7 +16,7 @@ export function AIChatWidget() {
     {
       id: '1',
       role: 'assistant',
-      content: 'Hi there! I am Sparky, your EventSpark AI assistant. How can I help you discover events or manage your ticketing today?'
+      content: 'Hi, I\'m Sparky! ⚡ How can I help you find your next event?'
     }
   ]);
   const [input, setInput] = useState('');

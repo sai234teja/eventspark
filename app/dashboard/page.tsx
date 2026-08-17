@@ -114,7 +114,7 @@ export default async function DashboardOverview() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-slate-800/60 rounded-2xl p-8 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-500/10 via-purple-500/10 to-pink-500/10 border border-slate-800/60 rounded-2xl p-5 md:p-8 relative overflow-hidden">
         <div className="relative z-10">
           <ClientGreeting userName={userName} />
           <p className="text-slate-400 max-w-xl">

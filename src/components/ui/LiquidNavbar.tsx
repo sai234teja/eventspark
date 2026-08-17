@@ -4,9 +4,10 @@ import React, { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import { usePathname } from 'next/navigation';
-import { LogIn, UserPlus, LayoutDashboard, Compass, Sparkles } from 'lucide-react';
+import { LogIn, UserPlus, LayoutDashboard, Compass, Sparkles, Menu, X } from 'lucide-react';
 import { BrandLogo } from '@/components/ui/BrandLogo';
 import { createBrowserClient } from '@supabase/ssr';
+import { motion, AnimatePresence } from 'framer-motion';
 import './LiquidNavbar.css';
 
 export function LiquidNavbar() {
@@ -15,6 +16,7 @@ export function LiquidNavbar() {
   const [session, setSession] = useState<any>(null);
   const [role, setRole] = useState<string>('user');
   const [appStatus, setAppStatus] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
   const glareRef = useRef<HTMLDivElement>(null);
   const pillRef = useRef<HTMLDivElement>(null);
@@ -178,7 +180,77 @@ export function LiquidNavbar() {
             </svg>
           </div>
         </button>
+
+        <div className="divider md:hidden"></div>
+
+        <button
+          className="theme-btn md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Mobile Menu Toggle"
+        >
+          <Menu className="w-[20px] h-[20px]" />
+        </button>
       </nav>
+
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[40]"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-20 left-4 right-4 bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl z-[50] flex flex-col gap-2"
+            >
+              <div className="flex justify-between items-center mb-2 px-2">
+                <span className="font-bold text-slate-900 dark:text-white">Menu</span>
+                <button onClick={() => setMobileMenuOpen(false)} className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="flex flex-col gap-1">
+                {tabs.map((tab, idx) => {
+                  const isActive = activeTab === idx;
+                  return (
+                    <Link 
+                      key={tab.label} 
+                      href={tab.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold transition-colors ${
+                        isActive 
+                          ? 'bg-[#6C47FF]/10 text-[#6C47FF]' 
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      {tab.icon}
+                      {tab.label}
+                    </Link>
+                  )
+                })}
+              </div>
+
+              {session && (
+                <div className="pt-2 mt-2 border-t border-slate-200/50 dark:border-slate-800/50">
+                  <button 
+                    onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                    className="flex items-center gap-3 px-4 py-3.5 rounded-xl font-semibold text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors w-full text-left"
+                  >
+                    Log out
+                  </button>
+                </div>
+              )}
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -133,7 +133,7 @@ export default function Home() {
             <Sparkles className="w-3.5 h-3.5" /> Next-Gen Ticketing & Discovery
           </motion.div>
           
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-4 flex flex-col items-center">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-4 flex flex-col items-center break-keep">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -163,8 +163,9 @@ export default function Home() {
               variants={{
                 visible: { transition: { staggerChildren: 0.1, delayChildren: 0.4 } }
               }}
-              className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B] inline-block w-full break-words hyphens-none"
+              className="text-transparent bg-clip-text bg-gradient-to-r from-[#6C47FF] via-[#8F75FF] to-[#FF6B6B] inline-block w-full"
             >
+              <span style={{ display: 'block', wordBreak: 'keep-all', whiteSpace: 'normal' }}>
               {["Best", "Experiences"].map((word, i) => (
                 <motion.span
                   key={i}
@@ -177,6 +178,7 @@ export default function Home() {
                   {word}
                 </motion.span>
               ))}
+              </span>
             </motion.div>
           </h1>
           

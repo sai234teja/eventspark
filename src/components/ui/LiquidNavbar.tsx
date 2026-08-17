@@ -126,7 +126,7 @@ export function LiquidNavbar() {
           </Link>
         </div>
 
-        <div className="nav-items relative hidden md:flex">
+        <div className="hidden md:flex items-center gap-2">
           <div className="active-pill" id="active-pill" ref={pillRef}></div>
 
           {tabs.map((tab, idx) => (
@@ -184,11 +184,11 @@ export function LiquidNavbar() {
         <div className="divider md:hidden"></div>
 
         <button
-          className="theme-btn md:hidden"
+          className="flex md:hidden items-center justify-center p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           aria-label="Mobile Menu Toggle"
         >
-          <Menu className="w-[20px] h-[20px]" />
+          <Menu className="w-[24px] h-[24px]" />
         </button>
       </nav>
 

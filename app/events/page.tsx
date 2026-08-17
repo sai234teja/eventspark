@@ -111,7 +111,7 @@ function EventsDiscoveryContent() {
           <div className="bg-white dark:bg-[#111118] border border-slate-200 dark:border-slate-800 rounded-[12px] p-6 shadow-sm flex flex-col">
             
             <button 
-              className="md:hidden flex items-center justify-between w-full pb-3 border-b border-slate-200 dark:border-slate-800"
+              className="flex md:hidden items-center justify-between w-full pb-3 border-b border-slate-200 dark:border-slate-800"
               onClick={() => setIsMobileFiltersOpen(!isMobileFiltersOpen)}
             >
               <div className="flex items-center gap-2 text-base font-bold text-slate-900 dark:text-white">
@@ -124,7 +124,7 @@ function EventsDiscoveryContent() {
               <SlidersHorizontal className="h-4.5 w-4.5 text-[#6C47FF]" /> Filter Events
             </h2>
             
-            <div className={`space-y-5 pt-4 md:pt-6 md:block overflow-hidden transition-all duration-300 ${isMobileFiltersOpen ? 'max-h-[1000px] opacity-100' : 'max-h-0 opacity-0 md:max-h-none md:opacity-100'}`}>
+            <div className={`space-y-5 pt-4 md:pt-6 transition-all duration-300 ${isMobileFiltersOpen ? 'block' : 'hidden md:block'}`}>
               {/* Search input */}
               <div className="space-y-2">
                 <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Search</label>

@@ -199,7 +199,7 @@ export function LiquidNavbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[40]"
+              className="fixed inset-0 bg-slate-900/45 backdrop-blur-sm z-[9998] pointer-events-auto"
               onClick={() => setMobileMenuOpen(false)}
             />
             <motion.div
@@ -207,11 +207,15 @@ export function LiquidNavbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="absolute top-20 left-4 right-4 bg-white/70 dark:bg-black/70 backdrop-blur-xl border border-white/20 rounded-2xl p-4 shadow-2xl z-[50] flex flex-col gap-2"
+              className="absolute top-24 left-4 right-4 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-2xl z-[9999] flex flex-col gap-2 pointer-events-auto"
             >
               <div className="flex justify-between items-center mb-2 px-2">
                 <span className="font-bold text-slate-900 dark:text-white">Menu</span>
-                <button onClick={() => setMobileMenuOpen(false)} className="p-1.5 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+                <button 
+                  onClick={() => setMobileMenuOpen(false)} 
+                  className="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-500 hover:text-slate-950 dark:hover:text-white transition-colors pointer-events-auto"
+                  aria-label="Close Mobile Menu"
+                >
                   <X className="w-5 h-5" />
                 </button>
               </div>

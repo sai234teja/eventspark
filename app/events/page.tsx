@@ -15,6 +15,8 @@ import { useSearch } from "@/hooks/useSearch";
 import { EventCard } from "@/components/ui/EventCard";
 import { createBrowserClient } from "@supabase/ssr";
 
+import { LiquidNavbar } from "@/components/ui/LiquidNavbar";
+
 const CATEGORIES_WITH_DOTS = [
   { slug: "music", name: "Music", dotColor: "bg-purple-500" },
   { slug: "tech", name: "Tech", dotColor: "bg-blue-500" },
@@ -76,35 +78,10 @@ function EventsDiscoveryContent() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-[#0A0A0F] text-slate-900 dark:text-white pb-16 transition-colors duration-300">
-      {/* Navbar */}
-      <nav className="px-6 py-4 border-b border-slate-200/80 dark:border-slate-800/80 bg-white/70 dark:bg-[#0A0A0F]/70 backdrop-blur-md sticky top-0 z-50 transition-all">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <BrandLogo />
-          <div className="flex items-center space-x-4">
-            {mounted && (
-              <button
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className="p-2.5 rounded-full text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors border border-slate-200 dark:border-slate-800"
-                aria-label="Toggle Dark Mode"
-              >
-                {theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
-              </button>
-            )}
-            <Link href="/dashboard">
-              <Button variant="ghost" className="text-slate-700 dark:text-slate-300 hover:text-[#6C47FF] hover:bg-slate-100 dark:hover:bg-slate-900 font-semibold rounded-[8px]">
-                Dashboard
-              </Button>
-            </Link>
-            <Link href="/create-event">
-              <Button className="bg-[#6C47FF] hover:bg-[#6C47FF]/90 text-white font-semibold rounded-[8px]">
-                Create Event
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
+      {/* Responsive LiquidNavbar */}
+      <LiquidNavbar />
 
-      <div className="max-w-7xl mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 md:gap-10 items-start">
+      <div className="max-w-7xl mx-auto px-6 py-10 pt-28 grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 md:gap-10 items-start">
         
         {/* Filters Sidebar */}
         <aside className="w-full shrink-0 space-y-6 sticky top-24 self-start z-10">
